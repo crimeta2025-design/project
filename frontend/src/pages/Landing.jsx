@@ -216,7 +216,7 @@ const Landing = () => {
           >
             <motion.div variants={fadeInUp}>
               <Bot className="w-16 h-16 text-blue-600 mb-6" />
-              <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+              <h2 className="text-4xl md:text-5xl font-bold text-blue-900 mb-6">
                 AI-Powered Assistance
               </h2>
               <p className="text-xl text-gray-700 mb-8 leading-relaxed">

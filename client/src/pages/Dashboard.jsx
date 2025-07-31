@@ -1,27 +1,186 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
+import PropTypes from 'prop-types';
 import {
   BarChart3,
   TrendingUp,
+  TrendingDown,
   MapPin,
   AlertTriangle,
   Shield,
   Users,
-  Clock
+  Clock,
+  Home,
+  FileText,
+  Settings,
+  User,
+  LogOut,
+  Briefcase,
+  ChevronDown,
+  ChevronUp,
+  Star,
+  BadgePercent
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
+// ====== Tricolor Header Bar ======
+const TricolorBar = ({ show }) =>
+  show ? (
+    <div className="w-full flex h-[6px]">
+      {/* <div className="flex-1 bg-[#138808]" /> Green */}
+      <div className="flex-1 bg-white" />
+      {/* <div className="flex-1 bg-[#ff9933]" /> */}
+    </div>
+  ) : null;
+
+TricolorBar.propTypes = { show: PropTypes.bool };
+
+// ====== Utility Color Helpers ======
+const getStatusColor = (status) => {
+  switch (status) {
+    case 'resolved': return 'bg-green-100 text-green-800 border-green-300';
+    case 'investigating': return 'bg-[#e0e7f7] text-[#204080] border-[#b3c1ec]';
+    case 'pending': return 'bg-orange-100 text-orange-800 border-orange-300';
+    default: return 'bg-gray-100 text-gray-700 border-gray-300';
+  }
+};
+
+const getSeverityColor = (severity) => {
+  switch (severity) {
+    case 'high': return 'bg-red-500';
+    case 'medium': return 'bg-yellow-400';
+    case 'low': return 'bg-green-500';
+    default: return 'bg-gray-500';
+  }
+};
+
+const getRoleClass = (role, light = false) => {
+  if (role === 'citizen') return light ? 'bg-green-50 border-green-600 text-[#204080]' : 'bg-green-600';
+  if (role === 'police') return light ? 'bg-yellow-50 border-yellow-500 text-[#204080]' : 'bg-yellow-400';
+  if (role === 'admin') return light ? 'bg-red-50 border-red-500 text-[#204080]' : 'bg-red-500';
+  return 'bg-gray-50 border-gray-300 text-[#204080]';
+};
+
+const FAKE_DEPARTMENT_STATS = [
+  { dept: 'Central Police', members: 138, openCases: 9, resolved: 121, satisfaction: 88 },
+  { dept: 'Metro Security', members: 37, openCases: 2, resolved: 34, satisfaction: 95 },
+  { dept: 'Civic Watch', members: 34, openCases: 4, resolved: 90, satisfaction: 80 },
+  { dept: 'Cyber Cell', members: 23, openCases: 1, resolved: 41, satisfaction: 92 }
+];
+
+const REPORT_TYPES = [
+  { type: 'Theft', count: 62, icon: Briefcase, color: 'text-orange-500' },
+  { type: 'Vandalism', count: 29, icon: AlertTriangle, color: 'text-yellow-700' },
+  { type: 'Assault', count: 17, icon: User, color: 'text-red-600' },
+  { type: 'Drug Activity', count: 12, icon: FileText, color: 'text-teal-700' },
+  { type: 'Other', count: 36, icon: Star, color: 'text-gray-500' }
+];
+
+// More mock users for activity
+const usersMock = [
+  { name: 'Radhika Sharma', role: 'police', activity: 'Marked case #293 as resolved', minAgo: 11 },
+  { name: 'Anupam S.', role: 'citizen', activity: 'Filed report in Market Sq.', minAgo: 26 },
+  { name: 'Admin', role: 'admin', activity: 'Granted badge to Officer Sunil', minAgo: 40 }
+];
+
+// ====== Stats Widget ======
+const StatCard = ({ stat, alt }) => {
+  const Icon = stat.icon;
+  return (
+    <motion.div
+      variants={{
+        initial: { opacity: 0, y: 28 },
+        animate: { opacity: 1, y: 0 },
+      }}
+      className={`rounded-lg border-2 shadow-md p-6 hover:bg-[#2953a7]/10 transition-all duration-300
+        ${alt ? 'bg-white border-yellow-700' : 'bg-white border-blue-800'}
+      `}
+    >
+      <div className="flex items-center justify-between mb-4">
+        <div className={`w-12 h-12 rounded-lg flex items-center justify-center shadow ${stat.iconBg || 'bg-blue-700'}`}>
+          <Icon className="w-6 h-6 text-white" />
+        </div>
+        <div className={`flex items-center space-x-1 text-sm ${stat.trend === 'up' ? 'text-green-700' : 'text-red-600'}`}>
+          {stat.trend === 'up' ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
+          <span>{stat.change}</span>
+        </div>
+      </div>
+      <h3 className="text-2xl font-extrabold text-[#204080] mb-1">{stat.value}</h3>
+      <p className="text-gray-700 text-sm">{stat.title}</p>
+    </motion.div>
+  );
+};
+
+StatCard.propTypes = {
+  stat: PropTypes.object,
+  alt: PropTypes.bool,
+};
+
+// ====== Department Overview Section ======
+const DepartmentOverview = ({ stats }) => (
+  <div className="bg-white rounded-lg border-2 border-blue-800 shadow p-6">
+    <h2 className="text-lg font-bold text-[#204080] mb-2 flex items-center"><BadgePercent className="w-5 h-5 mr-2" />Department Overview</h2>
+    <table className="w-full text-left text-[#204080]">
+      <thead>
+        <tr className="text-xs uppercase bg-blue-100">
+          <th className="py-2 px-2">Department</th>
+          <th className="py-2 px-2">Members</th>
+          <th className="py-2 px-2">Open Cases</th>
+          <th className="py-2 px-2">Resolved</th>
+          <th className="py-2 px-2">Satisfaction</th>
+        </tr>
+      </thead>
+      <tbody>
+        {stats.map((s, i) => (
+          <tr key={i} className="border-b">
+            <td className="py-2 px-2">{s.dept}</td>
+            <td className="py-2 px-2">{s.members}</td>
+            <td className="py-2 px-2">{s.openCases}</td>
+            <td className="py-2 px-2">{s.resolved}</td>
+            <td className="py-2 px-2">{s.satisfaction}%</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+);
+
+DepartmentOverview.propTypes = { stats: PropTypes.array };
+
+// ====== Reports By Type Section (with icons) ======
+const ReportsByType = ({ data }) => (
+  <div className="bg-white rounded-lg border-2 border-yellow-700 shadow p-6 mb-6">
+    <h2 className="text-lg font-bold text-[#204080] mb-4 flex items-center"><BarChart3 className="w-5 h-5 mr-2" />Reports by Type</h2>
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+      {data.map((r, i) => {
+        const Icon = r.icon;
+        return (
+          <div key={i} className="flex items-center space-x-3 p-4 rounded-lg bg-[#e5edfa]">
+            <Icon className={`w-7 h-7 ${r.color}`} />
+            <span className="font-bold text-lg text-[#204080]">{r.count}</span>
+            <span className="text-sm">{r.type}</span>
+          </div>
+        );
+      })}
+    </div>
+  </div>
+);
+
+ReportsByType.propTypes = { data: PropTypes.array };
+
+// ====== Main Dashboard Component ======
 const Dashboard = () => {
   const { user } = useAuth();
 
-  const stats = [
+  // ----- Stats Data -----
+  const stats = useMemo(() => ([
     {
       title: 'Total Reports',
       value: '156',
       change: '+12%',
       trend: 'up',
       icon: BarChart3,
-      color: 'from-blue-500 to-blue-600'
+      iconBg: 'bg-blue-700'
     },
     {
       title: 'Resolved Cases',
@@ -29,7 +188,7 @@ const Dashboard = () => {
       change: '+8%',
       trend: 'up',
       icon: Shield,
-      color: 'from-green-500 to-green-600'
+      iconBg: 'bg-green-700'
     },
     {
       title: 'Active Cases',
@@ -37,7 +196,7 @@ const Dashboard = () => {
       change: '-2%',
       trend: 'down',
       icon: AlertTriangle,
-      color: 'from-orange-500 to-orange-600'
+      iconBg: 'bg-yellow-600'
     },
     {
       title: 'Community Score',
@@ -45,63 +204,29 @@ const Dashboard = () => {
       change: '+5%',
       trend: 'up',
       icon: Users,
-      color: 'from-purple-500 to-purple-600'
+      iconBg: 'bg-purple-700'
     }
+  ]), []);
+
+  // ----- Reports Data -----
+  const recentReports = useMemo(() => [
+    { id: 1, type: 'Theft', location: 'Downtown Mall', time: '2 hours ago', status: 'investigating', severity: 'medium' },
+    { id: 2, type: 'Vandalism', location: 'Central Park', time: '4 hours ago', status: 'resolved', severity: 'low' },
+    { id: 3, type: 'Assault', location: 'Main Street', time: '6 hours ago', status: 'pending', severity: 'high' },
+    { id: 4, type: 'Drug Activity', location: 'School District', time: '8 hours ago', status: 'investigating', severity: 'high' },
+    { id: 5, type: 'Theft', location: 'Station Road', time: '1 day ago', status: 'resolved', severity: 'medium' },
+    { id: 6, type: 'Other', location: 'Sector 9', time: '2 days ago', status: 'pending', severity: 'low' }
+  ], []);
+
+  // ----- Activity Feed -----
+  const activity = [
+    { text: "New report filed in Downtown area", minutes: 5, color: 'bg-green-600' },
+    { text: "Case #456 marked as resolved", minutes: 15, color: 'bg-yellow-600' },
+    { text: "Safety alert issued for Park area", minutes: 60, color: 'bg-[#204080]' },
+    { text: "Community patrol scheduled", minutes: 120, color: 'bg-orange-500' }
   ];
 
-  const recentReports = [
-    {
-      id: 1,
-      type: 'Theft',
-      location: 'Downtown Mall',
-      time: '2 hours ago',
-      status: 'investigating',
-      severity: 'medium'
-    },
-    {
-      id: 2,
-      type: 'Vandalism',
-      location: 'Central Park',
-      time: '4 hours ago',
-      status: 'resolved',
-      severity: 'low'
-    },
-    {
-      id: 3,
-      type: 'Assault',
-      location: 'Main Street',
-      time: '6 hours ago',
-      status: 'pending',
-      severity: 'high'
-    },
-    {
-      id: 4,
-      type: 'Drug Activity',
-      location: 'School District',
-      time: '8 hours ago',
-      status: 'investigating',
-      severity: 'high'
-    }
-  ];
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'resolved': return 'bg-green-500/20 text-green-300 border-green-500/30';
-      case 'investigating': return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
-      case 'pending': return 'bg-orange-500/20 text-orange-300 border-orange-500/30';
-      default: return 'bg-gray-500/20 text-gray-300 border-gray-500/30';
-    }
-  };
-
-  const getSeverityColor = (severity) => {
-    switch (severity) {
-      case 'high': return 'bg-red-500';
-      case 'medium': return 'bg-orange-500';
-      case 'low': return 'bg-green-500';
-      default: return 'bg-gray-500';
-    }
-  };
-
+  // ----- Animation -----
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
@@ -109,197 +234,82 @@ const Dashboard = () => {
   };
 
   const staggerContainer = {
-    animate: {
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
+    animate: { transition: { staggerChildren: 0.1 } }
   };
 
+  // ================ RENDER ================
   return (
-    <div className="min-h-screen pt-8 pb-8 bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <motion.div
-          className="mb-8"
-          initial="initial"
-          animate="animate"
-          variants={fadeInUp}
-        >
-          <div
-            className={`rounded-lg p-6 border-2 ${
-              user?.role === 'citizen'
-                ? 'bg-green-500/10 border-green-400'
-                : user?.role === 'police'
-                ? 'bg-yellow-400/10 border-yellow-400'
-                : 'bg-red-500/10 border-red-400'
-            }`}
-          >
-            <div className="flex items-center space-x-4">
-              <div
-                className={`p-3 rounded-full ${
-                  user?.role === 'citizen'
-                    ? 'bg-green-500'
-                    : user?.role === 'police'
-                    ? 'bg-yellow-400'
-                    : 'bg-red-500'
-                }`}
-              >
-                <Shield
-                  className={`w-8 h-8 ${
-                    user?.role === 'police' ? 'text-blue-900' : 'text-white'
-                  }`}
-                />
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold text-white mb-1">
-                  Welcome {' '}
-                  {user?.name}
-                </h1>
-                <p
-                  className={`font-medium ${
-                    user?.role === 'citizen'
-                      ? 'text-green-300'
-                      : user?.role === 'police'
-                      ? 'text-yellow-300'
-                      : 'text-red-300'
-                  }`}
-                >
-                  {user?.role === 'citizen'
-                    ? 'Community Safety Dashboard'
-                    : user?.role === 'police'
+    <div className="min-h-screen bg-gray-50 text-black">
+      {/* SCHEME STRIPE FOR GOVERNMENT LOOK */}
+      <TricolorBar show />
+
+      {/* Main content */}
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-10 py-8">
+        {/* Header User Card */}
+        <motion.div className="mb-8" initial="initial" animate="animate" variants={fadeInUp}>
+          <div className={`rounded-lg p-6 border-2 shadow flex flex-col sm:flex-row sm:items-center gap-6 ${getRoleClass(user?.role, true)}`}>
+            <div className={`p-4 rounded-full ${getRoleClass(user?.role)}`}>
+              <Shield className={`w-10 h-10 ${user?.role === 'police' ? 'text-[#204080]' : 'text-white'}`} />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold mb-1">{`Welcome, ${user?.role === 'citizen' ? 'Citizen' : user?.role === 'police' ? 'Officer' : 'Administrator'} ${user?.name || 'Guest'}`}</h1>
+              <p className={`font-medium ${user?.role === 'citizen' ? 'text-green-700'
+                : user?.role === 'police' ? 'text-yellow-700'
+                  : 'text-red-700'
+                }`}>
+                {user?.role === 'citizen'
+                  ? 'Community Safety Dashboard'
+                  : user?.role === 'police'
                     ? 'Law Enforcement Portal'
                     : 'System Administration Center'}
-                </p>
-                {user?.badge && (
-                  <p className="text-gray-300 text-sm">
-                    Badge: {user?.badge} • {user?.department}
-                  </p>
-                )}
-              </div>
+              </p>
+              {user?.badge && (
+                <div className="text-gray-700 text-sm">Badge: {user?.badge} • {user?.department}</div>
+              )}
             </div>
           </div>
         </motion.div>
 
-        {/* Stats Grid */}
+        {/* Stats widgets grid */}
         <motion.div
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
-          initial="initial"
-          animate="animate"
-          variants={staggerContainer}
+          initial="initial" animate="animate" variants={staggerContainer}
         >
-          {stats.map((stat, index) => {
-            const Icon = stat.icon;
-            return (
-              <motion.div
-                key={index}
-                variants={fadeInUp}
-                className={`backdrop-blur-md rounded-lg border-2 p-6 hover:bg-white/15 transition-all duration-300 ${
-                  user?.role === 'citizen'
-                    ? 'bg-white/10 border-green-400/30'
-                    : user?.role === 'police'
-                    ? 'bg-white/10 border-yellow-400/30'
-                    : 'bg-white/10 border-red-400/30'
-                }`}
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <div
-                    className={`w-12 h-12 rounded-lg flex items-center justify-center ${
-                      user?.role === 'citizen'
-                        ? 'bg-green-500'
-                        : user?.role === 'police'
-                        ? 'bg-yellow-400'
-                        : 'bg-red-500'
-                    }`}
-                  >
-                    <Icon
-                      className={`w-6 h-6 ${
-                        user?.role === 'police' ? 'text-blue-900' : 'text-white'
-                      }`}
-                    />
-                  </div>
-                  <div
-                    className={`flex items-center space-x-1 text-sm ${
-                      stat.trend === 'up'
-                        ? 'text-green-400'
-                        : 'text-red-400'
-                    }`}
-                  >
-                    <TrendingUp
-                      className={`w-4 h-4 ${
-                        stat.trend === 'down' ? 'rotate-180' : ''
-                      }`}
-                    />
-                    <span>{stat.change}</span>
-                  </div>
-                </div>
-                <h3 className="text-2xl font-bold text-white mb-1">
-                  {stat.value}
-                </h3>
-                <p className="text-gray-300 text-sm">{stat.title}</p>
-              </motion.div>
-            );
-          })}
+          {stats.map((stat, idx) => (
+            <StatCard key={idx} stat={stat} alt={idx % 2 === 1} />
+          ))}
         </motion.div>
 
+        {/* "Reports by Type" and "Department Overview" row */}
+        <div className="grid lg:grid-cols-2 gap-8 mb-8">
+          <ReportsByType data={REPORT_TYPES} />
+          <DepartmentOverview stats={FAKE_DEPARTMENT_STATS} />
+        </div>
+
+        {/* Main content row (Reports, Quick Actions, Activity) */}
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Recent Reports */}
-          <motion.div
-            className="lg:col-span-2"
-            initial="initial"
-            animate="animate"
-            variants={fadeInUp}
-          >
-            <div
-              className={`bg-white/10 backdrop-blur-md rounded-lg border-2 p-6 ${
-                user?.role === 'citizen'
-                  ? 'border-green-400/30'
-                  : user?.role === 'police'
-                  ? 'border-yellow-400/30'
-                  : 'border-red-400/30'
-              }`}
-            >
+          <motion.div className="lg:col-span-2" initial="initial" animate="animate" variants={fadeInUp}>
+            <div className="bg-white rounded-lg border-2 border-blue-800 shadow p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-white">Recent Reports</h2>
-                <button
-                  className={`text-sm font-medium transition-colors ${
-                    user?.role === 'citizen'
-                      ? 'text-green-400 hover:text-green-300'
-                      : user?.role === 'police'
-                      ? 'text-yellow-400 hover:text-yellow-300'
-                      : 'text-red-400 hover:text-red-300'
-                  }`}
-                >
-                  View All
-                </button>
+                <h2 className="text-xl font-bold text-[#204080]">Recent Reports</h2>
+                <button className="text-sm font-semibold transition-colors text-blue-800 hover:text-yellow-700">View All</button>
               </div>
 
               <div className="space-y-4">
                 {recentReports.map((report) => (
-                  <div
-                    key={report.id}
-                    className="bg-white/5 rounded-lg p-4 border border-white/10 hover:bg-white/10 transition-all duration-200"
-                  >
+                  <div key={report.id}
+                    className="bg-[#e5edfa] rounded-lg p-4 border border-[#c4d2ee] hover:bg-[#eef4fb] transition-all duration-200">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center space-x-3">
-                        <div
-                          className={`w-3 h-3 rounded-full ${getSeverityColor(
-                            report.severity
-                          )}`}
-                        ></div>
-                        <h3 className="text-white font-medium">
-                          {report.type}
-                        </h3>
+                        <div className={`w-3 h-3 rounded-full ${getSeverityColor(report.severity)}`}></div>
+                        <h3 className="text-[#204080] font-semibold">{report.type}</h3>
                       </div>
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs border ${getStatusColor(
-                          report.status
-                        )}`}
-                      >
+                      <span className={`px-2 py-1 rounded-full text-xs border font-semibold capitalize ${getStatusColor(report.status)}`}>
                         {report.status}
                       </span>
                     </div>
-                    <div className="flex items-center justify-between text-sm text-gray-300">
+                    <div className="flex items-center justify-between text-sm text-[#204080]/75">
                       <div className="flex items-center space-x-4">
                         <div className="flex items-center space-x-1">
                           <MapPin className="w-4 h-4" />
@@ -318,33 +328,19 @@ const Dashboard = () => {
           </motion.div>
 
           {/* Quick Actions & Activity Feed */}
-          <motion.div
-            className="space-y-6"
-            initial="initial"
-            animate="animate"
-            variants={fadeInUp}
-          >
+          <motion.div className="space-y-6" initial="initial" animate="animate" variants={fadeInUp}>
+
             {/* Quick Actions */}
-            <div
-              className={`bg-white/10 backdrop-blur-md rounded-lg border-2 p-6 ${
-                user?.role === 'citizen'
-                  ? 'border-green-400/30'
-                  : user?.role === 'police'
-                  ? 'border-yellow-400/30'
-                  : 'border-red-400/30'
-              }`}
-            >
-              <h2 className="text-xl font-bold text-white mb-4">
-                Quick Actions
-              </h2>
+            <div className={`bg-white rounded-lg border-2 border-yellow-700 shadow p-6`}>
+              <h2 className="text-xl font-bold text-[#204080] mb-4">Quick Actions</h2>
               <div className="space-y-3">
                 {user?.role === 'citizen' && (
                   <>
-                    <button className="w-full bg-green-500 hover:bg-green-600 text-white p-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2">
+                    <button className="w-full bg-green-600 hover:bg-green-700 text-white p-3 rounded-lg font-semibold transition-colors flex items-center justify-center space-x-2">
                       <AlertTriangle className="w-4 h-4" />
                       <span>Report Incident</span>
                     </button>
-                    <button className="w-full bg-white/10 hover:bg-white/20 text-white p-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2">
+                    <button className="w-full bg-[#204080]/10 hover:bg-[#204080]/20 text-[#204080] p-3 rounded-lg font-semibold transition-colors flex items-center justify-center space-x-2">
                       <BarChart3 className="w-4 h-4" />
                       <span>View My Reports</span>
                     </button>
@@ -352,94 +348,59 @@ const Dashboard = () => {
                 )}
                 {(user?.role === 'admin' || user?.role === 'police') && (
                   <>
-                    <button
-                      className={`w-full p-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2 ${
-                        user?.role === 'police'
-                          ? 'bg-yellow-400 hover:bg-yellow-500 text-blue-900'
-                          : 'bg-red-500 hover:bg-red-600 text-white'
-                      }`}
-                    >
+                    <button className={`w-full p-3 rounded-lg font-semibold transition-colors flex items-center justify-center space-x-2
+                      ${user?.role === 'police'
+                        ? 'bg-yellow-400 hover:bg-yellow-500 text-[#204080]'
+                        : 'bg-red-500 hover:bg-red-600 text-white'}`}>
                       <Shield className="w-4 h-4" />
                       <span>
-                        {user?.role === 'police'
-                          ? 'Police Panel'
-                          : 'Admin Panel'}
+                        {user?.role === 'police' ? 'Police Panel' : 'Admin Panel'}
                       </span>
                     </button>
-                    <button className="w-full bg-white/10 hover:bg-white/20 text-white p-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2">
+                    <button className="w-full bg-[#204080]/10 hover:bg-[#204080]/20 text-[#204080] p-3 rounded-lg font-semibold transition-colors flex items-center justify-center space-x-2">
                       <Users className="w-4 h-4" />
                       <span>User Management</span>
                     </button>
                   </>
                 )}
-                <button className="w-full bg-white/10 hover:bg-white/20 text-white p-3 rounded-lg font-medium transition-colors flex items-center justify-center space-x-2">
+                <button className="w-full bg-[#204080]/10 hover:bg-[#204080]/20 text-[#204080] p-3 rounded-lg font-semibold transition-colors flex items-center justify-center space-x-2">
                   <MapPin className="w-4 h-4" />
                   <span>View Safety Map</span>
                 </button>
               </div>
             </div>
 
-            {/* Activity Feed */}
-            <div
-              className={`bg-white/10 backdrop-blur-md rounded-lg border-2 p-6 ${
-                user?.role === 'citizen'
-                  ? 'border-green-400/30'
-                  : user?.role === 'police'
-                  ? 'border-yellow-400/30'
-                  : 'border-red-400/30'
-              }`}
-            >
-              <h2 className="text-xl font-bold text-white mb-4">
-                Recent Activity
-              </h2>
+            {/* Recent Activity */}
+            <div className="bg-white rounded-lg border-2 border-blue-800 shadow p-6">
+              <h2 className="text-xl font-bold text-[#204080] mb-4">Recent Activity</h2>
               <div className="space-y-3">
-                <div className="flex items-start space-x-3">
-                  <div
-                    className={`w-2 h-2 rounded-full mt-2 ${
-                      user?.role === 'citizen'
-                        ? 'bg-green-400'
-                        : user?.role === 'police'
-                        ? 'bg-yellow-400'
-                        : 'bg-red-400'
-                    }`}
-                  ></div>
-                  <div>
-                    <p className="text-white text-sm">
-                      New report filed in Downtown area
-                    </p>
-                    <p className="text-gray-400 text-xs">5 minutes ago</p>
+                {activity.map((act, idx) => (
+                  <div className="flex items-start space-x-3" key={idx}>
+                    <div className={`w-2 h-2 rounded-full mt-2 ${act.color}`}></div>
+                    <div>
+                      <p className="text-[#204080] text-sm">{act.text}</p>
+                      <p className="text-gray-500 text-xs">{act.minutes < 60 ? `${act.minutes} minutes ago` : `${act.minutes / 60} hour(s) ago`}</p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-start space-x-3">
-                  <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
-                  <div>
-                    <p className="text-white text-sm">
-                      Case #456 marked as resolved
-                    </p>
-                    <p className="text-gray-400 text-xs">15 minutes ago</p>
+                ))}
+                {usersMock.map((u, i) => (
+                  <div className="flex items-start space-x-3" key={i + 4}>
+                    <div className={`w-2 h-2 rounded-full mt-2 ${getRoleClass(u.role)}`}></div>
+                    <div>
+                      <p className="text-[#204080] text-sm">{u.name}: {u.activity}</p>
+                      <p className="text-gray-500 text-xs">{u.minAgo} minutes ago</p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-start space-x-3">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
-                  <div>
-                    <p className="text-white text-sm">
-                      Safety alert issued for Park area
-                    </p>
-                    <p className="text-gray-400 text-xs">1 hour ago</p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-3">
-                  <div className="w-2 h-2 bg-orange-500 rounded-full mt-2"></div>
-                  <div>
-                    <p className="text-white text-sm">
-                      Community patrol scheduled
-                    </p>
-                    <p className="text-gray-400 text-xs">2 hours ago</p>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
+
           </motion.div>
+        </div>
+
+        {/* Footer note */}
+        <div className="text-center text-gray-200 py-8">
+          SafeReport &copy; {new Date().getFullYear()} – Official Government Safety Portal
         </div>
       </div>
     </div>

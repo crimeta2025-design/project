@@ -46,131 +46,143 @@ console.log("User object in Navbar:", user);
   ];
 
   return (
-    <nav className="bg-gradient-to-r from-blue-800 to-blue-900 border-b-4 border-yellow-400 sticky top-0 z-50 shadow-lg">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <Link to="/dashboard" className="flex items-center space-x-2">
-            <Shield className="w-8 h-8 text-yellow-400" />
-            <div className="flex flex-col">
-              <span className="text-white font-bold text-lg leading-tight">SafeReport</span>
-              <span className="text-yellow-300 text-xs font-medium">Government Portal</span>
+    <nav className="bg-white border-b-4 border-white">
+        <div className="max-w-7xl mx-auto flex justify-between items-center px-4 sm:px-8 py-3">
+          {/* Logo & Title */}
+          <Link to="/dashboard" className="flex items-center gap-3">
+            <Shield className="text-blue-600 w-10 h-10" />
+            <div>
+              <span className="block text-xl font-extrabold text-blue-700 leading-5 tracking-wide">Crimeta</span>
+              <span className="block text-xs uppercase tracking-wide font-semibold text-yellow-500">Official Govt. Portal</span>
             </div>
           </Link>
-
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
-            {navItems.map((item) => {
-              const Icon = item.icon;
+          {/* Navigation - Desktop */}
+          <div className="hidden md:flex items-center space-x-2 ml-8">
+            {navItems.map(item => {
               const isActive = location.pathname === item.path;
-              
+              const Icon = item.icon;
               return (
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
-                    isActive 
-                      ? 'bg-yellow-400 text-blue-900 font-semibold' 
-                      : 'text-white hover:bg-blue-700 hover:text-yellow-200'
+                  className={`flex items-center px-4 py-2 rounded-lg font-medium transition duration-150 ${
+                    isActive
+                      ? 'bg-blue-300 text-black font-bold shadow'
+                      : 'text-blue-900 hover:bg-blue-50 hover:text-yellow-700'
                   }`}
                 >
-                  <Icon className="w-4 h-4" />
-                  <span>{item.label}</span>
+                  <Icon className="w-5 h-5 mr-2" />
+                  {item.label}
                 </Link>
               );
             })}
           </div>
-
-          {/* User Menu */}
-          <div className="hidden md:flex items-center space-x-4">
-            <div className="flex items-center space-x-3 text-white bg-blue-700 px-3 py-2 rounded-lg">
-              <User className="w-4 h-4" />
-              <div className="flex flex-col">
-                <span className="text-sm font-medium">{user?.name}</span>
+          {/* User Info / Logout - Desktop */}
+          <div className="hidden md:flex items-center space-x-5">
+            <div className="px-4 py-2 rounded-lg bg-blue-50 flex items-center gap-2">
+              <User className="w-5 h-5 text-blue-800" />
+              <div>
+                <span className="block text-sm text-blue-900 font-semibold">{user?.name}</span>
                 {user?.badge && (
-                  <span className="text-xs text-yellow-300">Badge: {user?.badge}</span>
+                  <span className="block text-xs text-yellow-600">Badge: {user.badge}</span>
                 )}
               </div>
-              <span className={`px-2 py-1 text-xs rounded-full font-medium ${
-                user?.role === 'admin' ? 'bg-red-600 text-white' :
-                user?.role === 'police' ? 'bg-yellow-400 text-blue-900' :
-                'bg-green-600 text-white'
-              }`}>
-                {user?.role.toUpperCase()}
+              <span
+                className={`ml-2 px-2 py-1 text-xs rounded font-semibold
+                  ${
+                    user?.role === 'admin'
+                      ? 'bg-red-600 text-white'
+                      : user?.role === 'police'
+                      ? 'bg-yellow-500 text-blue-900'
+                      : 'bg-green-500 text-white'
+                  }
+                `}
+                aria-label={`Role: ${user?.role}`}
+              >
+                {user?.role ? user.role.toUpperCase() : 'GUEST'}
               </span>
             </div>
+            {/* Logout */}
             <button
               onClick={handleLogout}
-              className="flex items-center space-x-2 px-3 py-2 text-white hover:text-yellow-300 hover:bg-blue-700 rounded-md transition-all duration-200"
+              title="Logout"
+              className="flex items-center gap-2 px-4 py-2 text-blue-900 rounded-lg hover:text-white hover:bg-blue-800 transition"
             >
-              <LogOut className="w-4 h-4" />
-              <span className="text-sm">Logout</span>
+              <LogOut className="w-5 h-5" />
+              <span className="text-sm font-semibold">Logout</span>
             </button>
           </div>
-
-          {/* Mobile menu button */}
+          {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden text-white hover:text-yellow-300 p-2"
+            className="md:hidden p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-700"
+            aria-label="Open Menu"
           >
-            {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {isMenuOpen ? <X className="w-7 h-7 text-blue-800" /> : <Menu className="w-7 h-7 text-blue-800" />}
           </button>
         </div>
-
-        {/* Mobile Navigation */}
+        {/* Mobile Navigation Drawer */}
         {isMenuOpen && (
-          <motion.div 
-            initial={{ opacity: 0, y: -20 }}
+          <motion.div
+            initial={{ opacity: 0, y: -24 }}
             animate={{ opacity: 1, y: 0 }}
-            className="md:hidden py-4"
+            className="md:hidden bg-white px-4 border-t border-blue-50"
           >
-            <div className="flex flex-col space-y-2">
-              {navItems.map((item) => {
-                const Icon = item.icon;
+            <div className="py-4 space-y-1">
+              {navItems.map(item => {
                 const isActive = location.pathname === item.path;
-                
+                const Icon = item.icon;
                 return (
                   <Link
                     key={item.path}
                     to={item.path}
                     onClick={() => setIsMenuOpen(false)}
-                    className={`flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
-                      isActive 
-                        ? 'bg-yellow-400 text-blue-900 font-semibold' 
-                        : 'text-white hover:bg-blue-700 hover:text-yellow-200'
+                    className={`flex items-center px-4 py-3 rounded-lg font-medium transition ${
+                      isActive
+                        ? 'bg-yellow-400 text-blue-800 font-bold shadow'
+                        : 'text-blue-900 hover:bg-blue-50 hover:text-yellow-700'
                     }`}
                   >
-                    <Icon className="w-4 h-4" />
-                    <span>{item.label}</span>
+                    <Icon className="w-5 h-5 mr-2" />
+                    {item.label}
                   </Link>
                 );
               })}
-              
-              <div className="border-t border-blue-700 pt-2 mt-2">
-                <div className="flex items-center space-x-2 px-3 py-2 text-white">
-                  <User className="w-4 h-4" />
-                  <span className="text-sm">{user?.name}</span>
-                  <span className={`px-2 py-1 text-xs rounded-full font-medium ${
-                    user?.role === 'admin' ? 'bg-red-600 text-white' :
-                    user?.role === 'police' ? 'bg-yellow-400 text-blue-900' :
-                    'bg-green-600 text-white'
-                  }`}>
-                    {user?.role.toUpperCase()}
-                  </span>
-                </div>
-                <button
-                  onClick={handleLogout}
-                  className="w-full flex items-center space-x-2 px-3 py-2 text-white hover:text-yellow-300 hover:bg-blue-700 rounded-md transition-all duration-200"
+              {/* Divider */}
+              <div className="border-t border-blue-100 my-2" />
+              {/* User and Logout - Mobile */}
+              <div className="flex items-center gap-3 px-3 py-2 bg-blue-50 rounded-lg">
+                <User className="w-5 h-5 text-blue-800" />
+                <span className="text-blue-900 text-sm font-semibold">{user?.name}</span>
+                <span
+                  className={`ml-1 px-2 py-1 text-xs rounded font-semibold
+                    ${
+                      user?.role === 'admin'
+                        ? 'bg-red-600 text-white'
+                        : user?.role === 'police'
+                        ? 'bg-yellow-500 text-blue-900'
+                        : 'bg-green-500 text-white'
+                    }
+                  `}
                 >
-                  <LogOut className="w-4 h-4" />
-                  <span className="text-sm">Logout</span>
-                </button>
+                  {user?.role?.toUpperCase() || 'GUEST'}
+                </span>
               </div>
+              <button
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  handleLogout();
+                }}
+                className="flex items-center w-full gap-2 px-4 py-3 mt-1 text-blue-900 hover:text-white hover:bg-blue-800 rounded-lg font-medium transition"
+                title="Logout"
+              >
+                <LogOut className="w-5 h-5" />
+                <span>Logout</span>
+              </button>
             </div>
           </motion.div>
         )}
-      </div>
-    </nav>
+      </nav>
   );
 };
 

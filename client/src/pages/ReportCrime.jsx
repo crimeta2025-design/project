@@ -84,7 +84,7 @@ const ReportCrime = () => {
   };
 
   return (
-    <div className="min-h-screen pt-8 pb-8">
+    <div className="min-h-screen bg-[#ffffff] text-gray-900">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div 
@@ -95,16 +95,16 @@ const ReportCrime = () => {
         >
           <div className="flex items-center space-x-3 mb-4">
             <AlertTriangle className="w-8 h-8 text-[#00C9A7]" />
-            <h1 className="text-3xl font-bold text-white">Report an Incident</h1>
+            <h1 className="text-3xl font-bold text-blue-900">Report an Incident</h1>
           </div>
-          <p className="text-gray-300">
+          <p className="text-gray-900">
             Help keep your community safe by reporting incidents. All reports are taken seriously and handled with care.
           </p>
         </motion.div>
 
         {/* Form */}
         <motion.div 
-          className="bg-white/10 backdrop-blur-md rounded-lg border border-white/20 p-8"
+          className="bg-gray-100 backdrop-blur-md rounded-lg border border-blue-800 p-8"
           initial="initial"
           animate="animate"
           variants={fadeInUp}
@@ -112,7 +112,7 @@ const ReportCrime = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Crime Type */}
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-3">
+              <label className="block text-sm font-medium text-gray-900 mb-3">
                 Type of Incident *
               </label>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
@@ -121,8 +121,8 @@ const ReportCrime = () => {
                     key={type}
                     className={`p-3 rounded-lg border cursor-pointer transition-all duration-200 text-center ${
                       formData.type === type
-                        ? 'border-[#00C9A7] bg-[#00C9A7]/10'
-                        : 'border-white/20 bg-white/5 hover:bg-white/10'
+                        ? 'border-[#0028c9] bg-[#00C9A7]/10'
+                        : 'border-black bg-white hover:bg-white/10'
                     }`}
                   >
                     <input
@@ -135,7 +135,7 @@ const ReportCrime = () => {
                       required
                     />
                     <span className={`text-sm ${
-                      formData.type === type ? 'text-white font-medium' : 'text-gray-300'
+                      formData.type === type ? 'text-black font-medium' : 'text-gray-900'
                     }`}>
                       {type}
                     </span>
@@ -146,7 +146,7 @@ const ReportCrime = () => {
 
             {/* Severity */}
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-3">
+              <label className="block text-sm font-medium text-gray-900 mb-3">
                 Severity Level
               </label>
               <div className="flex space-x-4">
@@ -160,7 +160,7 @@ const ReportCrime = () => {
                     className={`flex items-center space-x-2 p-3 rounded-lg border cursor-pointer transition-all duration-200 ${
                       formData.severity === severity.value
                         ? 'border-[#00C9A7] bg-[#00C9A7]/10'
-                        : 'border-white/20 bg-white/5 hover:bg-white/10'
+                        : 'border-black bg-white/5 hover:bg-white/10'
                     }`}
                   >
                     <input
@@ -173,7 +173,7 @@ const ReportCrime = () => {
                     />
                     <div className={`w-3 h-3 rounded-full ${severity.color}`}></div>
                     <span className={`text-sm ${
-                      formData.severity === severity.value ? 'text-white font-medium' : 'text-gray-300'
+                      formData.severity === severity.value ? 'text-black font-medium' : 'text-gray-900'
                     }`}>
                       {severity.label}
                     </span>
@@ -184,18 +184,18 @@ const ReportCrime = () => {
 
             {/* Location */}
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-900 mb-2">
                 Location *
               </label>
               <div className="relative">
-                <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-800" />
                 <input
                   type="text"
                   name="location"
                   value={formData.location}
                   onChange={handleChange}
                   required
-                  className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00C9A7] focus:border-transparent transition-all duration-200"
+                  className="w-full pl-10 pr-4 py-3 bg-white/10 border border-black rounded-lg text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00C9A7] focus:border-transparent transition-all duration-200"
                   placeholder="Enter the location where incident occurred"
                 />
               </div>
@@ -204,7 +204,7 @@ const ReportCrime = () => {
             {/* Date and Time */}
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-gray-900 mb-2">
                   Date *
                 </label>
                 <div className="relative">
@@ -214,23 +214,23 @@ const ReportCrime = () => {
                     value={formData.date}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#00C9A7] focus:border-transparent transition-all duration-200"
+                    className="w-full px-4 py-3 bg-white/10 border border-black rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-[#00C9A7] focus:border-transparent transition-all duration-200"
                   />
                 </div>
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-gray-900 mb-2">
                   Time
                 </label>
                 <div className="relative">
-                  <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-800" />
                   <input
                     type="time"
                     name="time"
                     value={formData.time}
                     onChange={handleChange}
-                    className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#00C9A7] focus:border-transparent transition-all duration-200"
+                    className="w-full pl-10 pr-4 py-3 bg-white/10 border border-black rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-[#00C9A7] focus:border-transparent transition-all duration-200"
                   />
                 </div>
               </div>
@@ -238,18 +238,18 @@ const ReportCrime = () => {
 
             {/* Description */}
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-900 mb-2">
                 Description *
               </label>
               <div className="relative">
-                <FileText className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+                <FileText className="absolute left-3 top-3 w-5 h-5 text-gray-800" />
                 <textarea
                   name="description"
                   value={formData.description}
                   onChange={handleChange}
                   required
                   rows={6}
-                  className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00C9A7] focus:border-transparent transition-all duration-200 resize-none"
+                  className="w-full pl-10 pr-4 py-3 bg-white/10 border border-black rounded-lg text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00C9A7] focus:border-transparent transition-all duration-200 resize-none"
                   placeholder="Provide a detailed description of what happened..."
                 />
               </div>
@@ -257,10 +257,10 @@ const ReportCrime = () => {
 
             {/* Image Upload */}
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-900 mb-2">
                 Evidence (Photos)
               </label>
-              <div className="border-2 border-dashed border-white/20 rounded-lg p-6 hover:border-[#00C9A7] transition-colors">
+              <div className="border-2 border-dashed border-black rounded-lg p-6 hover:border-[#00C9A7] transition-colors">
                 <input
                   type="file"
                   multiple
@@ -273,11 +273,11 @@ const ReportCrime = () => {
                   htmlFor="image-upload"
                   className="flex flex-col items-center justify-center cursor-pointer"
                 >
-                  <Upload className="w-12 h-12 text-gray-400 mb-3" />
-                  <p className="text-gray-300 text-center">
+                  <Upload className="w-12 h-12 text-gray-800 mb-3" />
+                  <p className="text-gray-900 text-center">
                     Click to upload images or drag and drop
                   </p>
-                  <p className="text-gray-400 text-sm mt-1">
+                  <p className="text-gray-800 text-sm mt-1">
                     PNG, JPG up to 10MB each
                   </p>
                 </label>
@@ -295,7 +295,7 @@ const ReportCrime = () => {
                       <button
                         type="button"
                         onClick={() => removeImage(index)}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute -top-2 -right-2 bg-red-500 text-black rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <X className="w-4 h-4" />
                       </button>
@@ -304,27 +304,13 @@ const ReportCrime = () => {
                 </div>
               )}
             </div>
-
-            {/* Anonymous Option */}
-            <div className="flex items-center space-x-3">
-              <input
-                type="checkbox"
-                name="anonymous"
-                checked={formData.anonymous}
-                onChange={handleChange}
-                className="w-4 h-4 text-[#00C9A7] bg-white/10 border-white/20 rounded focus:ring-[#00C9A7] focus:ring-2"
-              />
-              <label className="text-gray-300">
-                Submit this report anonymously
-              </label>
-            </div>
-
+ 
             {/* Submit Button */}
             <motion.button
               type="submit"
               disabled={loading}
               whileTap={{ scale: 0.98 }}
-              className="w-full bg-gradient-to-r from-[#00C9A7] to-[#00A690] text-white py-3 rounded-lg font-semibold flex items-center justify-center space-x-2 hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-gradient-to-r from-[#0086c9] to-[#005ea6] text-black py-3 rounded-lg font-semibold flex items-center justify-center space-x-2 hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
@@ -346,10 +332,10 @@ const ReportCrime = () => {
           variants={fadeInUp}
         >
           <div className="flex items-start space-x-3">
-            <AlertTriangle className="w-6 h-6 text-red-400 mt-0.5" />
+            <AlertTriangle className="w-6 h-6 text-black mt-0.5" />
             <div>
-              <h3 className="text-red-200 font-semibold mb-2">Emergency Situations</h3>
-              <p className="text-red-300 text-sm">
+              <h3 className="text-black font-semibold mb-2">Emergency Situations</h3>
+              <p className="text-black text-sm">
                 If you are experiencing an emergency or immediate danger, please call 911 immediately. 
                 This form is for non-emergency reporting only.
               </p>

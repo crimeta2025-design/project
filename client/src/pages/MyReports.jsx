@@ -99,7 +99,7 @@ const MyReports = () => {
       case 'investigating': return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
       case 'pending': return 'bg-orange-500/20 text-orange-300 border-orange-500/30';
       case 'rejected': return 'bg-red-500/20 text-red-300 border-red-500/30';
-      default: return 'bg-gray-500/20 text-gray-300 border-gray-500/30';
+      default: return 'bg-gray-500/20 text-gray-900 border-gray-500/30';
     }
   };
 
@@ -142,7 +142,7 @@ const MyReports = () => {
   };
 
   return (
-    <div className="min-h-screen pt-8 pb-8">
+    <div className="min-h-screen bg-[#ffffff] text-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div 
@@ -152,10 +152,10 @@ const MyReports = () => {
           variants={fadeInUp}
         >
           <div className="flex items-center space-x-3 mb-4">
-            <FileText className="w-8 h-8 text-[#00C9A7]" />
-            <h1 className="text-3xl font-bold text-white">My Reports</h1>
+            <FileText className="w-8 h-8 text-black" />
+            <h1 className="text-3xl font-bold text-blue-800">My Reports</h1>
           </div>
-          <p className="text-gray-300">
+          <p className="text-gray-900">
             Track and manage all your submitted incident reports
           </p>
         </motion.div>
@@ -176,55 +176,18 @@ const MyReports = () => {
             <motion.div
               key={index}
               variants={fadeInUp}
-              className="bg-white/10 backdrop-blur-md rounded-lg border border-white/20 p-6"
+              className="bg-white/10 backdrop-blur-md rounded-lg border border-blue-900 p-6"
             >
               <div className={`w-12 h-12 rounded-lg bg-gradient-to-r ${stat.color} flex items-center justify-center mb-3`}>
-                <FileText className="w-6 h-6 text-white" />
+                <FileText className="w-6 h-6 text-black" />
               </div>
-              <h3 className="text-2xl font-bold text-white mb-1">{stat.value}</h3>
-              <p className="text-gray-300 text-sm">{stat.label}</p>
+              <h3 className="text-2xl font-bold text-black mb-1">{stat.value}</h3>
+              <p className="text-gray-900 text-sm">{stat.label}</p>
             </motion.div>
           ))}
         </motion.div>
 
-        {/* Filters and Controls */}
-        <motion.div 
-          className="bg-white/10 backdrop-blur-md rounded-lg border border-white/20 p-6 mb-8"
-          initial="initial"
-          animate="animate"
-          variants={fadeInUp}
-        >
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
-            <div className="flex items-center space-x-4">
-              <Filter className="w-5 h-5 text-gray-400" />
-              <select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                className="bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#00C9A7]"
-              >
-                <option value="all">All Status</option>
-                <option value="pending">Pending</option>
-                <option value="investigating">Investigating</option>
-                <option value="resolved">Resolved</option>
-                <option value="rejected">Rejected</option>
-              </select>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              <span className="text-gray-300 text-sm">Sort by:</span>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#00C9A7]"
-              >
-                <option value="newest">Newest First</option>
-                <option value="oldest">Oldest First</option>
-                <option value="status">Status</option>
-              </select>
-            </div>
-          </div>
-        </motion.div>
-
+         
         {/* Reports List */}
         <motion.div 
           className="space-y-6"
@@ -238,15 +201,15 @@ const MyReports = () => {
               className="text-center py-12"
             >
               <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-white mb-2">No Reports Found</h3>
-              <p className="text-gray-300">You haven't submitted any reports yet.</p>
+              <h3 className="text-xl font-semibold text-black mb-2">No Reports Found</h3>
+              <p className="text-gray-900">You haven't submitted any reports yet.</p>
             </motion.div>
           ) : (
             sortedReports.map((report, index) => (
               <motion.div
                 key={report.id}
                 variants={fadeInUp}
-                className="bg-white/10 backdrop-blur-md rounded-lg border border-white/20 p-6 hover:bg-white/15 transition-all duration-300"
+                className="bg-gray-100 backdrop-blur-md rounded-lg border border-black p-6   transition-all duration-300"
               >
                 <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between space-y-4 lg:space-y-0">
                   {/* Report Details */}
@@ -254,32 +217,32 @@ const MyReports = () => {
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center space-x-3">
                         <div className={`w-4 h-4 rounded-full ${getSeverityColor(report.severity)}`}></div>
-                        <h3 className="text-xl font-semibold text-white">{report.type}</h3>
+                        <h3 className="text-xl font-semibold text-black ">{report.type}</h3>
                         <span className={`px-3 py-1 rounded-full text-xs border ${getStatusColor(report.status)}`}>
                           {report.status}
                         </span>
                       </div>
                     </div>
 
-                    <p className="text-gray-300 mb-4">{report.description}</p>
+                    <p className="text-gray-900 mb-4">{report.description}</p>
 
                     <div className="grid md:grid-cols-3 gap-4 mb-4">
-                      <div className="flex items-center space-x-2 text-gray-300">
+                      <div className="flex items-center space-x-2 text-gray-900">
                         <MapPin className="w-4 h-4" />
                         <span className="text-sm">{report.location}</span>
                       </div>
-                      <div className="flex items-center space-x-2 text-gray-300">
+                      <div className="flex items-center space-x-2 text-gray-900">
                         <Calendar className="w-4 h-4" />
                         <span className="text-sm">{report.date}</span>
                       </div>
-                      <div className="flex items-center space-x-2 text-gray-300">
+                      <div className="flex items-center space-x-2 text-gray-900">
                         <Clock className="w-4 h-4" />
                         <span className="text-sm">{report.time}</span>
                       </div>
                     </div>
 
                     <div className="bg-white/5 rounded-lg p-4 mb-4">
-                      <h4 className="text-white font-medium mb-2 flex items-center space-x-2">
+                      <h4 className="text-black font-medium mb-2 flex items-center space-x-2">
                         {getStatusIcon(report.status)}
                         <span>Case Updates</span>
                       </h4>
@@ -288,7 +251,7 @@ const MyReports = () => {
                           <div key={idx} className="flex items-start space-x-3">
                             <div className="w-2 h-2 bg-[#00C9A7] rounded-full mt-2"></div>
                             <div>
-                              <p className="text-gray-300 text-sm">{update.message}</p>
+                              <p className="text-gray-900 text-sm">{update.message}</p>
                               <p className="text-gray-400 text-xs">{update.date}</p>
                             </div>
                           </div>
@@ -296,35 +259,16 @@ const MyReports = () => {
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-400 text-sm">
-                        Report #{report.reportNumber}
-                      </span>
-                      <div className="flex items-center space-x-2">
-                        <button className="flex items-center space-x-1 text-[#00C9A7] hover:text-[#00A690] text-sm transition-colors">
-                          <Eye className="w-4 h-4" />
-                          <span>View Details</span>
-                        </button>
-                        {report.status === 'pending' && (
-                          <>
-                            <button className="flex items-center space-x-1 text-blue-400 hover:text-blue-300 text-sm transition-colors">
-                              <Edit className="w-4 h-4" />
-                              <span>Edit</span>
-                            </button>
-                            <button className="flex items-center space-x-1 text-red-400 hover:text-red-300 text-sm transition-colors">
-                              <Trash2 className="w-4 h-4" />
-                              <span>Delete</span>
-                            </button>
-                          </>
-                        )}
-                      </div>
-                    </div>
+ 
                   </div>
                 </div>
               </motion.div>
             ))
           )}
         </motion.div>
+        <footer className="mt-12 text-sm text-gray-500 text-center">
+          Crimeta Portal © {new Date().getFullYear()}  |  Official Government Service
+        </footer>
       </div>
     </div>
   );

@@ -241,10 +241,10 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50 text-black">
       {/* SCHEME STRIPE FOR GOVERNMENT LOOK */}
-      <TricolorBar show />
+ 
 
       {/* Main content */}
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-10 py-8">
+      <div className="max-w-full mx-auto ">
         {/* Header User Card */}
         <motion.div className="mb-8" initial="initial" animate="animate" variants={fadeInUp}>
           <div className={`rounded-lg p-6 border-2 shadow flex flex-col sm:flex-row sm:items-center gap-6 ${getRoleClass(user?.role, true)}`}>
@@ -346,7 +346,7 @@ const Dashboard = () => {
                     </button>
                   </>
                 )}
-                {(user?.role === 'admin' || user?.role === 'police') && (
+                {/* {(user?.role === 'admin' || user?.role === 'police') && (
                   <>
                     <button className={`w-full p-3 rounded-lg font-semibold transition-colors flex items-center justify-center space-x-2
                       ${user?.role === 'police'
@@ -362,7 +362,7 @@ const Dashboard = () => {
                       <span>User Management</span>
                     </button>
                   </>
-                )}
+                )} */}
                 <button className="w-full bg-[#204080]/10 hover:bg-[#204080]/20 text-[#204080] p-3 rounded-lg font-semibold transition-colors flex items-center justify-center space-x-2">
                   <MapPin className="w-4 h-4" />
                   <span>View Safety Map</span>

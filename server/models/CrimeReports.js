@@ -2,19 +2,26 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const crimeReports = new Schema({
-    reportedBy: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User', 
-        required: true
-    },
-    imageUrl: {
+    incidentType: {
         type: String,
-        required: true
+        required: true,
+        enum: [
+            'Theft/Burglary', 'Assault', 'Vandalism', 'Drug Activity', 'Fraud',
+            'Domestic Violence', 'Harassment', 'Traffic Violation', 
+            'Suspicious Activity', 'Other'
+        ]
     },
-    description: {
+    severity: {
         type: String,
+        required: true,
+        enum: ['Low', 'Medium', 'High']
+    },
+    locationAddress: {
+        type: String,
+        required: true,
         trim: true
     },
+    // User actual GPS location
     location: {
         type: {
             type: String,
@@ -22,14 +29,34 @@ const crimeReports = new Schema({
             required: true
         },
         coordinates: {
-            type: [Number],
+            type: [Number], // [longitude, latitude]
             required: true
         }
     },
-    assignedTo: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User', 
+    incidentDate: {
+        type: Date,
         required: true
+    },
+    description: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    evidenceUrls: {
+        type: [String],
+        default: []
+    },
+    isAnonymous: {
+        type: Boolean,
+        default: false
+    },
+    reportedBy: {
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+    },
+    assignedTo: {
+        type: Schema.Types.ObjectId,
+        ref: 'User'
     },
     status: {
         type: String,
@@ -38,7 +65,7 @@ const crimeReports = new Schema({
     }
 }, { timestamps: true });
 
-crimeReportSchema.index({ location: '2dsphere' });
+crimeReports.index({ location: '2dsphere' });
 
 module.exports = mongoose.model('CrimeReport', crimeReports);
 

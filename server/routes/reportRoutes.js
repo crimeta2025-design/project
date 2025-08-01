@@ -1,72 +1,122 @@
-const multer = require("multer");
-const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
+// File: backend/routes/reportRoutes.js
+// Apne purane route ko is code se replace karein.
+
 const express = require('express');
 const router = express.Router();
-const isAuthenticated = require("../middleware/auth.js");
+const multer = require('multer');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const cloudinary = require('cloudinary').v2;
+const CrimeReport = require('../models/CrimeReports');
+const { isAuthenticated } = require('../middleware/auth');
 
-// --- ROUTE: POST /api/reports/create ---
-router.post(
-    '/create', 
-   // isAuthenticated, 
-    upload.single('crimeImage'), // 'crimeImage' field image  process
-    async (req, res) => {
-        try {
-            const { latitude, longitude, description } = req.body;
-            const imageFile = req.file;
-
-            if (!imageFile || !latitude || !longitude) {
-                return res.status(400).json({ msg: "Image and location are required." });
-            }
-            const imageUrl = `https://example.com/uploads/${Date.now()}_${imageFile.originalname}`;
-            console.log("Image would be uploaded to:", imageUrl);
+// --- Cloudinary Configuration ---
+// Yeh check karega ki .env file se credentials load ho rahe hain ya nahi
+if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET) {
+    cloudinary.config({
+        cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+        api_key: process.env.CLOUDINARY_API_KEY,
+        api_secret: process.env.CLOUDINARY_API_SECRET
+    });
+    console.log("Cloudinary configured successfully!");
+} else {
+    console.error("!!! CLOUDINARY ENVIRONMENT VARIABLES NOT FOUND !!!");
+    console.error("Please check your .env file.");
+}
 
 
-            // --- Nearest POLICE STATION  ---
-            const userLocation = {
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: 'crime-reports',
+        allowed_formats: ['jpeg', 'png', 'jpg', 'mp4', 'mov', 'avi'],
+        resource_type: 'auto'
+    },
+});
+
+const upload = multer({ storage: storage });
+
+const getSeverity = (incidentType) => {
+    // ... aapka severity wala function ...
+    switch (incidentType) {
+        case 'Assault':
+        case 'Domestic Violence':
+        case 'Fraud':
+            return 'High';
+        case 'Theft/Burglary':
+        case 'Drug Activity':
+        case 'Harassment':
+        case 'Suspicious Activity':
+            return 'Medium';
+        default:
+            return 'Low';
+    }
+};
+
+// ROUTE: POST /user/create
+router.post('/create', isAuthenticated, upload.array('evidenceFiles', 5), async (req, res) => {
+    console.log("--- '/user/create' route hit ---");
+    console.log("Received Body:", req.body);
+    console.log("Received Files:", req.files);
+
+    try {
+        const { 
+            incidentType, 
+            locationAddress, 
+            latitude, 
+            longitude, 
+            incidentDate, 
+            description, 
+            isAnonymous 
+        } = req.body;
+
+        // Validation: Check karein ki zaroori fields hain ya nahi
+        if (!incidentType || !locationAddress || !incidentDate || !description) {
+            return res.status(400).json({ msg: "Please fill all required fields." });
+        }
+
+        const evidenceUrls = req.files ? req.files.map(file => file.path) : [];
+        const severity = getSeverity(incidentType);
+
+        const newReport = new CrimeReport({
+            incidentType,
+            severity,
+            locationAddress,
+            location: {
                 type: 'Point',
                 coordinates: [parseFloat(longitude), parseFloat(latitude)]
-            };
+            },
+            incidentDate,
+            description,
+            evidenceUrls,
+            isAnonymous: isAnonymous === 'true',
+            reportedBy: isAnonymous === 'true' ? null : req.user.id,
+        });
 
-            
-            const nearestPoliceStation = await User.findOne({
-                role: 'police',
-                status: 'approved',
-                location: {
-                    $near: {
-                        $geometry: userLocation,
-                        $maxDistance: 50000 // 50 km radius
-                    }
-                }
-            });
+        await newReport.save();
+        console.log("Report saved to MongoDB successfully.");
 
-            if (!nearestPoliceStation) {
-                return res.status(404).json({ msg: "No nearby police station found." });
-            }
+        res.status(201).json({ msg: 'Report created successfully', report: newReport });
 
-            console.log("Nearest station found:", nearestPoliceStation.name);
-
-            const newReport = new CrimeReport({
-                reportedBy: req.user.id, 
-                imageUrl: imageUrl,
-                description: description,
-                location: userLocation,
-                assignedTo: nearestPoliceStation._id,
-                status: 'new'
-            });
-
-            await newReport.save();
-
-            res.status(201).json({
-                msg: "Report successfully submitted!",
-                report: newReport
-            });
-
-        } catch (error) {
-            console.error(error);
-            res.status(500).json({ error: "Server error while creating report." });
-        }
+    } catch (error) {
+        // --- YEH HAI SABSE ZAROORI HISSA ---
+        // Yeh backend ke asli error ko pakdega aur frontend ko bhejega
+        console.error("!!! ERROR WHILE CREATING REPORT !!!");
+        console.error(error); // Terminal me poora error print karega
+        res.status(500).json({ msg: `Server Error: ${error.message}` });
     }
-);
+});
+
+router.get('/my-reports', isAuthenticated, async (req, res) => {
+    try {
+        // User ki ID (jo token se aayi hai) ke aadhar par reports dhundho
+        const reports = await CrimeReport.find({ reportedBy: req.user.id }).sort({ createdAt: -1 });
+        res.json(reports);
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).send('Server Error');
+    }
+});
 
 module.exports = router;
+
+

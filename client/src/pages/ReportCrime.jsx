@@ -1,65 +1,110 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   AlertTriangle, 
   MapPin, 
-  Camera, 
   FileText, 
   Clock, 
   Send,
   X,
   Upload
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const ReportCrime = () => {
+  // State from the second file (logic) with additions from the first (UI)
   const [formData, setFormData] = useState({
-    type: '',
+    incidentType: '',
     description: '',
-    location: '',
-    date: '',
-    time: '',
-    anonymous: false,
-    severity: 'medium'
+    locationAddress: '',
+    incidentDate: '',
+    incidentTime: '',
+    isAnonymous: false,
+    severity: 'medium' // Added from first file's UI
   });
-  const [images, setImages] = useState([]);
+  const [files, setFiles] = useState([]); // Renamed from 'images' for consistency
+  const [location, setLocation] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
+  // Crime types from the first file
   const crimeTypes = [
-    'Theft/Burglary',
-    'Assault',
-    'Vandalism',
-    'Drug Activity',
-    'Fraud',
-    'Domestic Violence',
-    'Harassment',
-    'Traffic Violation',
-    'Suspicious Activity',
-    'Other'
+    'Theft/Burglary', 'Assault', 'Vandalism', 'Drug Activity', 'Fraud',
+    'Domestic Violence', 'Harassment', 'Traffic Violation', 
+    'Suspicious Activity', 'Other'
   ];
 
+  // Geolocation logic from the second file
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setLocation({ latitude, longitude });
+        },
+        () => {
+          setError('Location access denied. Please enable it in your browser settings to submit a report.');
+        }
+      );
+    }
+  }, []);
+
+  // Form submission logic from the second file, updated to include all fields
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!location) {
+      setError('Location is required. Please wait for it to be detected or enable permissions.');
+      return;
+    }
     setLoading(true);
+    setError('');
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    const data = new FormData();
+    data.append('incidentType', formData.incidentType);
+    data.append('locationAddress', formData.locationAddress);
+    data.append('incidentDate', formData.incidentDate);
+    data.append('incidentTime', formData.incidentTime);
+    data.append('description', formData.description);
+    data.append('isAnonymous', formData.isAnonymous);
+    data.append('severity', formData.severity);
+    data.append('latitude', location.latitude);
+    data.append('longitude', location.longitude);
     
-    // Reset form
-    setFormData({
-      type: '',
-      description: '',
-      location: '',
-      date: '',
-      time: '',
-      anonymous: false,
-      severity: 'medium'
+    files.forEach(file => {
+      data.append('evidenceFiles', file);
     });
-    setImages([]);
-    setLoading(false);
-    
-    alert('Report submitted successfully!');
+
+    try {
+      // Your backend API endpoint
+      const API_URL = 'http://localhost:8080/user/create'; 
+      const token = localStorage.getItem('authToken');
+
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: data,
+      });
+
+      const responseData = await response.json();
+
+      if (!response.ok) {
+        throw new Error(responseData.msg || 'An unknown error occurred.');
+      }
+
+      alert('Report submitted successfully!');
+      navigate('/my-reports'); // Navigate after successful submission
+
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  // Handler functions from the second file
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({
@@ -68,25 +113,27 @@ const ReportCrime = () => {
     }));
   };
 
-  const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files);
-    setImages(prev => [...prev, ...files]);
+  const handleFileChange = (e) => {
+    const uploadedFiles = Array.from(e.target.files);
+    setFiles(prev => [...prev, ...uploadedFiles]);
   };
 
   const removeImage = (index) => {
-    setImages(prev => prev.filter((_, i) => i !== index));
+    setFiles(prev => prev.filter((_, i) => i !== index));
   };
 
+  // Animation variants
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.5 }
   };
 
+  // Merged JSX: Structure and CSS from the first file, connected to the second file's logic
   return (
-    <div className="min-h-screen bg-[#ffffff] text-gray-900">
+    <div className="min-h-screen bg-[#ffffff] text-gray-900 py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
+        {/* Header from file 1 */}
         <motion.div 
           className="mb-8"
           initial="initial"
@@ -102,7 +149,7 @@ const ReportCrime = () => {
           </p>
         </motion.div>
 
-        {/* Form */}
+        {/* Form container from file 1 */}
         <motion.div 
           className="bg-gray-100 backdrop-blur-md rounded-lg border border-blue-800 p-8"
           initial="initial"
@@ -110,7 +157,14 @@ const ReportCrime = () => {
           variants={fadeInUp}
         >
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Crime Type */}
+            {/* Error display logic from file 2, styled for light theme */}
+            {error && (
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md text-sm" role="alert">
+                {error}
+              </div>
+            )}
+            
+            {/* Incident Type: UI from file 1, logic from file 2 */}
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-3">
                 Type of Incident *
@@ -120,22 +174,22 @@ const ReportCrime = () => {
                   <label
                     key={type}
                     className={`p-3 rounded-lg border cursor-pointer transition-all duration-200 text-center ${
-                      formData.type === type
+                      formData.incidentType === type
                         ? 'border-[#0028c9] bg-[#00C9A7]/10'
-                        : 'border-black bg-white hover:bg-white/10'
+                        : 'border-black bg-white hover:bg-gray-50'
                     }`}
                   >
                     <input
                       type="radio"
-                      name="type"
+                      name="incidentType"
                       value={type}
-                      checked={formData.type === type}
+                      checked={formData.incidentType === type}
                       onChange={handleChange}
                       className="sr-only"
                       required
                     />
                     <span className={`text-sm ${
-                      formData.type === type ? 'text-black font-medium' : 'text-gray-900'
+                      formData.incidentType === type ? 'text-black font-medium' : 'text-gray-900'
                     }`}>
                       {type}
                     </span>
@@ -144,7 +198,7 @@ const ReportCrime = () => {
               </div>
             </div>
 
-            {/* Severity */}
+            {/* Severity Level: Section from file 1 */}
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-3">
                 Severity Level
@@ -160,7 +214,7 @@ const ReportCrime = () => {
                     className={`flex items-center space-x-2 p-3 rounded-lg border cursor-pointer transition-all duration-200 ${
                       formData.severity === severity.value
                         ? 'border-[#00C9A7] bg-[#00C9A7]/10'
-                        : 'border-black bg-white/5 hover:bg-white/10'
+                        : 'border-black bg-white hover:bg-gray-50'
                     }`}
                   >
                     <input
@@ -182,65 +236,59 @@ const ReportCrime = () => {
               </div>
             </div>
 
-            {/* Location */}
+            {/* Location: UI from file 1, logic from file 2 */}
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-2">
-                Location *
+                Location Address *
               </label>
               <div className="relative">
                 <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-800" />
                 <input
                   type="text"
-                  name="location"
-                  value={formData.location}
+                  name="locationAddress"
+                  value={formData.locationAddress}
                   onChange={handleChange}
                   required
-                  className="w-full pl-10 pr-4 py-3 bg-white/10 border border-black rounded-lg text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00C9A7] focus:border-transparent transition-all duration-200"
-                  placeholder="Enter the location where incident occurred"
+                  className="w-full pl-10 pr-4 py-3 bg-white border border-black rounded-lg text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#00C9A7] focus:border-transparent transition-all duration-200"
+                  placeholder="Enter the address or area of the incident"
                 />
               </div>
             </div>
 
-            {/* Date and Time */}
+            {/* Date and Time: UI from file 1, logic from file 2 */}
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Date *
-                </label>
+                <label className="block text-sm font-medium text-gray-900 mb-2">Date *</label>
                 <div className="relative">
                   <input
                     type="date"
-                    name="date"
-                    value={formData.date}
+                    name="incidentDate"
+                    value={formData.incidentDate}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-3 bg-white/10 border border-black rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-[#00C9A7] focus:border-transparent transition-all duration-200"
+                    className="w-full px-4 py-3 bg-white border border-black rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-[#00C9A7] focus:border-transparent transition-all duration-200"
                   />
                 </div>
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-900 mb-2">
-                  Time
-                </label>
+                <label className="block text-sm font-medium text-gray-900 mb-2">Time</label>
                 <div className="relative">
                   <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-800" />
                   <input
                     type="time"
-                    name="time"
-                    value={formData.time}
+                    name="incidentTime"
+                    value={formData.incidentTime}
                     onChange={handleChange}
-                    className="w-full pl-10 pr-4 py-3 bg-white/10 border border-black rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-[#00C9A7] focus:border-transparent transition-all duration-200"
+                    className="w-full pl-10 pr-4 py-3 bg-white border border-black rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-[#00C9A7] focus:border-transparent transition-all duration-200"
                   />
                 </div>
               </div>
             </div>
 
-            {/* Description */}
+            {/* Description: UI from file 1, logic from file 2 */}
             <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
-                Description *
-              </label>
+              <label className="block text-sm font-medium text-gray-900 mb-2">Description *</label>
               <div className="relative">
                 <FileText className="absolute left-3 top-3 w-5 h-5 text-gray-800" />
                 <textarea
@@ -249,53 +297,44 @@ const ReportCrime = () => {
                   onChange={handleChange}
                   required
                   rows={6}
-                  className="w-full pl-10 pr-4 py-3 bg-white/10 border border-black rounded-lg text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00C9A7] focus:border-transparent transition-all duration-200 resize-none"
+                  className="w-full pl-10 pr-4 py-3 bg-white border border-black rounded-lg text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#00C9A7] focus:border-transparent transition-all duration-200 resize-none"
                   placeholder="Provide a detailed description of what happened..."
                 />
               </div>
             </div>
 
-            {/* Image Upload */}
+            {/* File Upload: UI from file 1, logic from file 2 */}
             <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
-                Evidence (Photos)
-              </label>
+              <label className="block text-sm font-medium text-gray-900 mb-2">Evidence (Photos/Videos)</label>
               <div className="border-2 border-dashed border-black rounded-lg p-6 hover:border-[#00C9A7] transition-colors">
                 <input
                   type="file"
                   multiple
-                  accept="image/*"
-                  onChange={handleImageUpload}
+                  accept="image/*,video/*"
+                  onChange={handleFileChange}
                   className="hidden"
-                  id="image-upload"
+                  id="file-upload"
                 />
-                <label
-                  htmlFor="image-upload"
-                  className="flex flex-col items-center justify-center cursor-pointer"
-                >
+                <label htmlFor="file-upload" className="flex flex-col items-center justify-center cursor-pointer">
                   <Upload className="w-12 h-12 text-gray-800 mb-3" />
-                  <p className="text-gray-900 text-center">
-                    Click to upload images or drag and drop
-                  </p>
-                  <p className="text-gray-800 text-sm mt-1">
-                    PNG, JPG up to 10MB each
-                  </p>
+                  <p className="text-gray-900 text-center">Click to upload or drag and drop</p>
+                  <p className="text-gray-600 text-sm mt-1">PNG, JPG, MP4 up to 10MB each</p>
                 </label>
               </div>
 
-              {images.length > 0 && (
+              {files.length > 0 && (
                 <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {images.map((image, index) => (
+                  {files.map((file, index) => (
                     <div key={index} className="relative group">
                       <img
-                        src={URL.createObjectURL(image)}
+                        src={URL.createObjectURL(file)}
                         alt={`Evidence ${index + 1}`}
                         className="w-full h-24 object-cover rounded-lg"
                       />
                       <button
                         type="button"
                         onClick={() => removeImage(index)}
-                        className="absolute -top-2 -right-2 bg-red-500 text-black rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <X className="w-4 h-4" />
                       </button>
@@ -304,13 +343,26 @@ const ReportCrime = () => {
                 </div>
               )}
             </div>
- 
-            {/* Submit Button */}
+            
+            {/* Anonymous Checkbox: UI styled for light theme */}
+            <div className="flex items-center space-x-3">
+              <input 
+                type="checkbox" 
+                name="isAnonymous" 
+                checked={formData.isAnonymous} 
+                onChange={handleChange} 
+                id="isAnonymous"
+                className="w-4 h-4 text-[#00C9A7] bg-gray-200 border-gray-400 rounded focus:ring-[#00C9A7] focus:ring-offset-0 focus:ring-2" 
+              />
+              <label htmlFor="isAnonymous" className="text-sm text-gray-900">Submit this report anonymously</label>
+            </div>
+
+            {/* Submit Button: UI from file 1, logic from file 2, text color changed for contrast */}
             <motion.button
               type="submit"
               disabled={loading}
               whileTap={{ scale: 0.98 }}
-              className="w-full bg-gradient-to-r from-[#0086c9] to-[#005ea6] text-black py-3 rounded-lg font-semibold flex items-center justify-center space-x-2 hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-gradient-to-r from-[#0086c9] to-[#005ea6] text-white py-3 rounded-lg font-semibold flex items-center justify-center space-x-2 hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
@@ -324,19 +376,19 @@ const ReportCrime = () => {
           </form>
         </motion.div>
 
-        {/* Emergency Notice */}
+        {/* Emergency Notice from file 1 */}
         <motion.div 
-          className="mt-8 bg-red-500/20 border border-red-500/50 rounded-lg p-6"
+          className="mt-8 bg-red-100 border border-red-300 rounded-lg p-6"
           initial="initial"
           animate="animate"
           variants={fadeInUp}
         >
           <div className="flex items-start space-x-3">
-            <AlertTriangle className="w-6 h-6 text-black mt-0.5" />
+            <AlertTriangle className="w-6 h-6 text-red-600 mt-0.5" />
             <div>
-              <h3 className="text-black font-semibold mb-2">Emergency Situations</h3>
-              <p className="text-black text-sm">
-                If you are experiencing an emergency or immediate danger, please call 911 immediately. 
+              <h3 className="text-red-800 font-semibold mb-2">Emergency Situations</h3>
+              <p className="text-red-700 text-sm">
+                If you are experiencing an emergency or immediate danger, please call 112 immediately. 
                 This form is for non-emergency reporting only.
               </p>
             </div>

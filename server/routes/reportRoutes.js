@@ -10,7 +10,6 @@ const CrimeReport = require('../models/CrimeReports');
 const { isAuthenticated } = require('../middleware/auth');
 
 // --- Cloudinary Configuration ---
-// Yeh check karega ki .env file se credentials load ho rahe hain ya nahi
 if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET) {
     cloudinary.config({
         cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -93,7 +92,6 @@ router.post('/create', isAuthenticated, upload.array('evidenceFiles', 5), async 
         });
 
         await newReport.save();
-        console.log("Report saved to MongoDB successfully.");
 
         res.status(201).json({ msg: 'Report created successfully', report: newReport });
 

@@ -93,8 +93,7 @@ const ReportCrime = () => {
       if (!response.ok) {
         throw new Error(responseData.msg || 'An unknown error occurred.');
       }
-
-      alert('Report submitted successfully!');
+      // response.status(200).json({message: "Report Registered Successfully"})
       navigate('/my-reports'); // Navigate after successful submission
 
     } catch (err) {

@@ -3,7 +3,12 @@
   "version": "1.0.0",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "test:watch": "nodemon --exec \"npm test\"",
+    "lint": "echo \"Linting not configured\"",
+    "build": "echo \"Build process not required for Node.js\""
   },
   "keywords": [],
   "author": "",
@@ -21,5 +26,8 @@
     "multer-storage-cloudinary": "^4.0.0",
     "nodemailer": "^7.0.5",
     "react-router-dom": "^7.7.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
   }
 }

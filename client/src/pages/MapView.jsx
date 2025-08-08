@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import 'leaflet.heat';
 import {
   MapPin,
   Filter,
@@ -22,27 +23,156 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-// Custom marker icons
-const createCustomIcon = (color, type) => {
-  return L.divIcon({
-    className: 'custom-marker',
-    html: `<div style="
-      width: 20px;
-      height: 20px;
-      background: ${color};
-      border: 2px solid white;
-      border-radius: 50%;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 10px;
-      color: white;
-      font-weight: bold;
-    ">${type}</div>`,
-    iconSize: [20, 20],
-    iconAnchor: [10, 10]
-  });
+// Heatmap Layer component
+const HeatmapLayer = ({ points }) => {
+  const map = useMap();
+  
+  useEffect(() => {
+    if (!map || points.length === 0) return;
+    
+    let heatLayer = null;
+    
+    try {
+      // Remove any existing heatmap layers
+      map.eachLayer((layer) => {
+        if (layer._heat || (layer.options && layer.options.renderer === 'heatmap')) {
+          map.removeLayer(layer);
+        }
+      });
+      
+      // Check if L.heatLayer is available
+      if (typeof L.heatLayer === 'function' && points.length > 0) {
+        console.log('Creating heatmap with points:', points);
+        heatLayer = L.heatLayer(points, {
+          radius: 50,
+          blur: 35,
+          maxZoom: 18,
+          minOpacity: 0.4,
+          maxOpacity: 0.9,
+          gradient: {
+            0.0: '#00ff00',  // Green for low intensity
+            0.2: '#80ff00',
+            0.4: '#ffff00',  // Yellow 
+            0.6: '#ff8000',  // Orange
+            0.8: '#ff4000',  // Red-orange
+            1.0: '#ff0000',  // Red for high intensity
+          },
+        });
+        heatLayer.addTo(map);
+        console.log('Heatmap layer added successfully');
+      } else {
+        console.error('L.heatLayer is not available. Make sure leaflet.heat is properly loaded.');
+      }
+    } catch (error) {
+      console.error('Error creating heatmap:', error);
+    }
+    
+    // Cleanup function
+    return () => {
+      if (heatLayer && map.hasLayer && map.hasLayer(heatLayer)) {
+        map.removeLayer(heatLayer);
+      }
+    };
+  }, [map, points]);
+  
+  return null;
+};
+
+// Component for category symbols overlay on heatmap
+const CategorySymbolsLayer = ({ incidents }) => {
+  const getCategorySymbol = (type) => {
+    const symbols = {
+      theft: '🔓',
+      assault: '👊',
+      burglary: '🏠',
+      vandalism: '🔨',
+      fraud: '💳',
+      robbery: '💰',
+      harassment: '⚠️',
+      'drug-related': '💊',
+      violence: '⚡',
+      cybercrime: '💻'
+    };
+    return symbols[type] || '📍';
+  };
+
+  const getCategoryColor = (type) => {
+    const colors = {
+      theft: '#FF6B6B',
+      assault: '#FF8E53',
+      burglary: '#FF6B9D',
+      vandalism: '#845EC2',
+      fraud: '#4E8397',
+      robbery: '#B39BC8',
+      harassment: '#F9CA24',
+      'drug-related': '#6C5CE7',
+      violence: '#A0E7E5',
+      cybercrime: '#FD79A8'
+    };
+    return colors[type] || '#747d8c';
+  };
+
+  return (
+    <>
+      {incidents.map((incident) => {
+        const symbol = getCategorySymbol(incident.type);
+        const color = getCategoryColor(incident.type);
+        
+        const customIcon = L.divIcon({
+          html: `
+            <div style="
+              background: ${color};
+              color: white;
+              border-radius: 50%;
+              width: 30px;
+              height: 30px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 14px;
+              border: 2px solid white;
+              box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            ">
+              ${symbol}
+            </div>
+          `,
+          className: 'custom-category-icon',
+          iconSize: [30, 30],
+          iconAnchor: [15, 15]
+        });
+
+        return (
+          <Marker
+            key={`symbol-${incident.id}`}
+            position={[incident.lat, incident.lng]}
+            icon={customIcon}
+          >
+            <Popup>
+              <div className="p-2">
+                <div className="flex items-center gap-2 mb-2">
+                  <span style={{
+                    display: 'inline-block',
+                    width: '12px',
+                    height: '12px',
+                    borderRadius: '50%',
+                    backgroundColor: incident.severity === 'high' ? '#ef4444' :
+                                     incident.severity === 'medium' ? '#eab308' : '#22c55e'
+                  }}></span>
+                  <strong className="capitalize">{incident.type}</strong>
+                  <span>{symbol}</span>
+                </div>
+                <p className="text-sm mb-1">{incident.description}</p>
+                <div className="text-xs text-gray-600">
+                  <div>📍 {incident.location}</div>
+                  <div>🕒 {incident.time}</div>
+                </div>
+              </div>
+            </Popup>
+          </Marker>
+        );
+      })}
+    </>
+  );
 };
 
 // Enhanced user location marker with pulsing effect
@@ -167,9 +297,11 @@ const ACCENT_COLOR = "#00C9A7";
 
 // Filters configuration
 const FILTERS = [
-  { value: "all", label: "All Incidents", count: 2 },
-  { value: "theft", label: "Theft", count: 1 },
-  { value: "assault", label: "Assault", count: 1 },
+  { value: "all", label: "All Incidents", count: 8 },
+  { value: "theft", label: "Theft", count: 4 },
+  { value: "assault", label: "Assault", count: 2 },
+  { value: "robbery", label: "Robbery", count: 1 },
+  { value: "vandalism", label: "Vandalism", count: 1 },
 ];
 
 const TIME_FILTERS = [
@@ -192,6 +324,7 @@ export default function MapView() {
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [timeFilter, setTimeFilter] = useState("week");
   const [mapView, setMapView] = useState("street"); // Add map view state
+  const [showHeatmap, setShowHeatmap] = useState(true); // Add heatmap toggle state
   const mapRef = useRef();
 
   const [userLocation, setUserLocation] = useState(null);
@@ -201,7 +334,7 @@ export default function MapView() {
   const [watchId, setWatchId] = useState(null);
   const [locationAccuracy, setLocationAccuracy] = useState(null);
 
-  // Enhanced incidents data with more details
+  // Enhanced incidents data with more details for better heatmap visualization
   const [incidents] = useState([
     { 
       id: 1, 
@@ -222,6 +355,66 @@ export default function MapView() {
       time: "6 hours ago",
       location: "Main Road",
       description: "Physical altercation reported"
+    },
+    { 
+      id: 3, 
+      type: "theft", 
+      lat: 21.1465, 
+      lng: 79.0875, 
+      severity: "medium",
+      time: "4 hours ago",
+      location: "Central Avenue",
+      description: "Phone snatching incident"
+    },
+    { 
+      id: 4, 
+      type: "vandalism", 
+      lat: 21.1445, 
+      lng: 79.0890, 
+      severity: "low",
+      time: "8 hours ago",
+      location: "Park Area",
+      description: "Property damage reported"
+    },
+    { 
+      id: 5, 
+      type: "theft", 
+      lat: 21.1470, 
+      lng: 79.0865, 
+      severity: "high",
+      time: "1 hour ago",
+      location: "Shopping Complex",
+      description: "Vehicle theft reported"
+    },
+    { 
+      id: 6, 
+      type: "assault", 
+      lat: 21.1440, 
+      lng: 79.0870, 
+      severity: "high",
+      time: "3 hours ago",
+      location: "Residential Area",
+      description: "Domestic violence incident"
+    },
+    { 
+      id: 7, 
+      type: "robbery", 
+      lat: 21.1450, 
+      lng: 79.0885, 
+      severity: "high",
+      time: "5 hours ago",
+      location: "Market Street",
+      description: "Armed robbery at local shop"
+    },
+    { 
+      id: 8, 
+      type: "theft", 
+      lat: 21.1460, 
+      lng: 79.0878, 
+      severity: "medium",
+      time: "7 hours ago",
+      location: "Bus Stop",
+      description: "Purse snatching incident"
     }
   ]);
 
@@ -361,24 +554,6 @@ export default function MapView() {
   const filteredIncidents = incidents.filter(
     i => selectedFilter === "all" || i.type === selectedFilter
   );
-
-  // Get marker color based on incident type and severity
-  const getMarkerColor = (type, severity) => {
-    const colors = {
-      theft: severity === "high" ? "#dc2626" : "#f59e0b",
-      assault: "#dc2626",
-    };
-    return colors[type] || "#6b7280";
-  };
-
-  // Get type abbreviation for marker
-  const getTypeAbbrev = (type) => {
-    const abbrevs = {
-      theft: "T",
-      assault: "A",
-    };
-    return abbrevs[type] || "?";
-  };
 
   // Get user location on mount
   useEffect(() => {
@@ -604,7 +779,49 @@ export default function MapView() {
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Last 24hrs</span>
-                  <span className="font-bold text-orange-600">2</span>
+                  <span className="font-bold text-orange-600">8</span>
+                </div>
+              </div>
+            </section>
+
+            {/* Category Legend - Show always */}
+            <section className="bg-white rounded-2xl border border-blue-100 shadow-md p-4 mt-4">
+              <div className="flex items-center mb-3 gap-2">
+                <div className="w-5 h-5 text-blue-800">🏷️</div>
+                <h2 className="font-bold text-sm" style={{ color: GOV_BLUE }}>
+                  Category Symbols
+                </h2>
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="flex items-center gap-2">
+                  <span>🔓</span><span>Theft</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span>👊</span><span>Assault</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span>🏠</span><span>Burglary</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span>🔨</span><span>Vandalism</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span>💳</span><span>Fraud</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span>💰</span><span>Robbery</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span>⚠️</span><span>Harassment</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span>💊</span><span>Drug-related</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span>⚡</span><span>Violence</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span>💻</span><span>Cybercrime</span>
                 </div>
               </div>
             </section>
@@ -679,6 +896,21 @@ export default function MapView() {
                         </button>
                       </div>
                     </div>
+                    
+                    {/* Heatmap Toggle */}
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setShowHeatmap(!showHeatmap)}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                          showHeatmap
+                            ? "bg-red-600 hover:bg-red-700 text-white"
+                            : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                        }`}
+                      >
+                        <div className={`w-2 h-2 rounded-full ${showHeatmap ? "bg-white" : "bg-red-600"}`}></div>
+                        {showHeatmap ? "Heatmap ON" : "Heatmap OFF"}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -702,10 +934,8 @@ export default function MapView() {
                   >
                     {/* Map View Controller - Handles programmatic layer switching */}
                     <MapViewController mapView={mapView} />
-
                     {/* Location updater component */}
                     <LocationUpdater userLocation={userLocation} mapRef={mapRef} />
-
                     {/* User Location Marker */}
                     {userLocation && (
                       <>
@@ -737,35 +967,123 @@ export default function MapView() {
                         )}
                       </>
                     )}
+                    {/* Heatmap overlay for incidents - Conditional rendering */}
+                    {showHeatmap && (
+                      <>
+                        <HeatmapLayer
+                          points={filteredIncidents.map((incident) => {
+                            let intensity;
+                            switch (incident.severity) {
+                              case 'high':
+                                intensity = 1.0;
+                                break;
+                              case 'medium':
+                                intensity = 0.6;
+                                break;
+                              case 'low':
+                                intensity = 0.3;
+                                break;
+                              default:
+                                intensity = 0.5;
+                            }
+                            return [incident.lat, incident.lng, intensity];
+                          })}
+                        />
+                        {/* Category symbols overlay on heatmap */}
+                        <CategorySymbolsLayer incidents={filteredIncidents} />
+                      </>
+                    )}
+                    
+                    {/* Individual incident markers - Show when heatmap is off */}
+                    {!showHeatmap && filteredIncidents.map((incident) => {
+                      const getCategorySymbol = (type) => {
+                        const symbols = {
+                          theft: '🔓',
+                          assault: '👊',
+                          burglary: '🏠',
+                          vandalism: '🔨',
+                          fraud: '💳',
+                          robbery: '💰',
+                          harassment: '⚠️',
+                          'drug-related': '💊',
+                          violence: '⚡',
+                          cybercrime: '💻'
+                        };
+                        return symbols[type] || '📍';
+                      };
 
-                    {/* Incident markers */}
-                    {filteredIncidents.map((incident) => (
-                      <Marker
-                        key={incident.id}
-                        position={[incident.lat, incident.lng]}
-                        icon={createCustomIcon(
-                          getMarkerColor(incident.type, incident.severity),
-                          getTypeAbbrev(incident.type)
-                        )}
-                      >
-                        <Popup>
-                          <div className="p-2">
-                            <div className="flex items-center gap-2 mb-2">
-                              <span className={`w-3 h-3 rounded-full ${
-                                incident.severity === 'high' ? 'bg-red-500' :
-                                incident.severity === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
-                              }`}></span>
-                              <strong className="capitalize">{incident.type}</strong>
-                            </div>
-                            <p className="text-sm mb-1">{incident.description}</p>
-                            <div className="text-xs text-gray-600">
-                              <div>📍 {incident.location}</div>
-                              <div>🕒 {incident.time}</div>
-                            </div>
+                      const getCategoryColor = (type) => {
+                        const colors = {
+                          theft: '#FF6B6B',
+                          assault: '#FF8E53',
+                          burglary: '#FF6B9D',
+                          vandalism: '#845EC2',
+                          fraud: '#4E8397',
+                          robbery: '#B39BC8',
+                          harassment: '#F9CA24',
+                          'drug-related': '#6C5CE7',
+                          violence: '#A0E7E5',
+                          cybercrime: '#FD79A8'
+                        };
+                        return colors[type] || '#747d8c';
+                      };
+
+                      const symbol = getCategorySymbol(incident.type);
+                      const color = getCategoryColor(incident.type);
+                      
+                      const customIcon = L.divIcon({
+                        html: `
+                          <div style="
+                            background: ${color};
+                            color: white;
+                            border-radius: 50%;
+                            width: 35px;
+                            height: 35px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            font-size: 16px;
+                            border: 3px solid white;
+                            box-shadow: 0 3px 6px rgba(0,0,0,0.4);
+                          ">
+                            ${symbol}
                           </div>
-                        </Popup>
-                      </Marker>
-                    ))}
+                        `,
+                        className: 'custom-category-icon',
+                        iconSize: [35, 35],
+                        iconAnchor: [17.5, 17.5]
+                      });
+
+                      return (
+                        <Marker
+                          key={incident.id}
+                          position={[incident.lat, incident.lng]}
+                          icon={customIcon}
+                        >
+                          <Popup>
+                            <div className="p-2">
+                              <div className="flex items-center gap-2 mb-2">
+                                <span style={{
+                                  display: 'inline-block',
+                                  width: '12px',
+                                  height: '12px',
+                                  borderRadius: '50%',
+                                  backgroundColor: incident.severity === 'high' ? '#ef4444' :
+                                                   incident.severity === 'medium' ? '#eab308' : '#22c55e'
+                                }}></span>
+                                <strong className="capitalize">{incident.type}</strong>
+                                <span>{symbol}</span>
+                              </div>
+                              <p className="text-sm mb-1">{incident.description}</p>
+                              <div className="text-xs text-gray-600">
+                                <div>📍 {incident.location}</div>
+                                <div>🕒 {incident.time}</div>
+                              </div>
+                            </div>
+                          </Popup>
+                        </Marker>
+                      );
+                    })}
                   </MapContainer>
                 )}
               </div>

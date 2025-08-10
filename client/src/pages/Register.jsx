@@ -14,11 +14,13 @@ const Register = () => {
     phone: '',
     password: '',
     confirmPassword: '',
-    role: 'citizen'
+    role: 'citizen',
+    badgeNumber: ''
   });
   
   // New state specifically for the OTP input
   const [otp, setOtp] = useState('');
+  const [isPolice, setIsPolice] = useState(false);
 
   // Common states for UI feedback
   const [loading, setLoading] = useState(false);
@@ -33,6 +35,15 @@ const Register = () => {
       ...formData,
       [e.target.name]: e.target.value
     });
+  };
+
+  const handlePoliceToggle = () => {
+    setIsPolice((prev) => !prev);
+    setFormData((prev) => ({
+      ...prev,
+      role: !isPolice ? 'police' : 'citizen',
+      badgeNumber: ''
+    }));
   };
 
   // --- Step 1: Handle Initial Registration and Send OTP ---
@@ -58,7 +69,8 @@ const Register = () => {
         email: formData.email,
         password: formData.password,
         contact_number: formData.phone,
-        role: formData.role
+        role: formData.role,
+        badge_number: formData.badgeNumber
       };
 
       const API_URL = 'http://localhost:8080/auth/register/user';
@@ -175,6 +187,23 @@ const Register = () => {
           {uiStep === 'details' ? (
             // --- REGISTRATION FORM ---
             <form onSubmit={handleRegisterSubmit} className="space-y-6">
+              {/* Police Registration Toggle */}
+              <div className="flex items-center gap-3 mb-2">
+                <button
+                  type="button"
+                  onClick={handlePoliceToggle}
+                  className={`px-4 py-2 rounded-lg font-semibold border-2 transition-colors duration-150 flex items-center gap-2 ${
+                    isPolice
+                      ? 'bg-yellow-400 border-yellow-600 text-blue-900 shadow'
+                      : 'bg-gray-100 border-gray-300 text-gray-700 hover:bg-yellow-100'
+                  }`}
+                  aria-pressed={isPolice}
+                >
+                  <Shield className="w-5 h-5" />
+                  Police Registration
+                </button>
+                <span className="text-xs text-gray-500">(For police officers only)</span>
+              </div>
               {/* Name Field */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -228,6 +257,36 @@ const Register = () => {
                   <input type={showPassword ? 'text' : 'password'} name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} required className="w-full pl-10 pr-4 py-3 bg-white border-2 border-gray-300 rounded-lg text-blue-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600" placeholder="Confirm your password" />
                 </div>
               </div>
+              {/* Badge Number Field - Only show for police */}
+              {isPolice && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <span className="text-blue-900 font-semibold">Badge Number</span>
+                    </label>
+                    <div className="relative">
+                      <Shield className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-blue-600" />
+                      <input 
+                        type="text" 
+                        name="badgeNumber" 
+                        value={formData.badgeNumber} 
+                        onChange={handleChange} 
+                        required={isPolice}
+                        className="w-full pl-10 pr-4 py-3 bg-white border-2 border-gray-300 rounded-lg text-blue-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600" 
+                        placeholder="Enter your official badge number (e.g., PD-2025-001)" 
+                      />
+                    </div>
+                    <p className="mt-1 text-xs text-yellow-600 font-medium">
+                      ⚠️ Badge number will be verified with official records.
+                    </p>
+                  </div>
+                </motion.div>
+              )}
               {/* Submit Button */}
               <motion.button type="submit" disabled={loading} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 rounded-lg font-bold flex items-center justify-center space-x-2 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed border-2 border-yellow-400">
                 {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : <><UserCheck className="w-5 h-5" /><span>Register Account</span></>}

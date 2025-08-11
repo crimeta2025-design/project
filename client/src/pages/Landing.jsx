@@ -64,7 +64,7 @@ const Landing = () => {
               to="/login"
               className="bg-white text-gray-900 px-8 py-4 rounded-lg font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
             >
-              Citizen Login
+              Official Login
             </Link>
             <Link
               to="/register"

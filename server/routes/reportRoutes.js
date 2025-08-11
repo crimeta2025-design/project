@@ -1,5 +1,4 @@
-// File: backend/routes/reportRoutes.js
-// Apne purane route ko is code se replace karein.
+
 
 const express = require('express');
 const router = express.Router();

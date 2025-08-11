@@ -252,7 +252,7 @@ const Dashboard = () => {
               <Shield className={`w-10 h-10 ${user?.role === 'police' ? 'text-[#204080]' : 'text-white'}`} />
             </div>
             <div>
-              <h1 className="text-3xl font-bold mb-1">{`Welcome, ${user?.role === 'citizen' ? 'Citizen' : user?.role === 'police' ? 'Officer' : 'Administrator'} ${user?.name || 'Guest'}`}</h1>
+              <h1 className="text-3xl font-bold mb-1">{`Welcome,  ${user?.name || 'Guest'}`}</h1>
               <p className={`font-medium ${user?.role === 'citizen' ? 'text-green-700'
                 : user?.role === 'police' ? 'text-yellow-700'
                   : 'text-red-700'

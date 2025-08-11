@@ -12,6 +12,8 @@ const path = require('path'); // Static files ke liye zaroori
 // Apne route files ko import karein
 const authRoute = require("./routes/authRoutes.js");
 const reportRoute = require("./routes/reportRoutes.js");
+const policeRoute = require("./routes/policeRoutes.js");
+
 
 const app = express();
 
@@ -28,6 +30,7 @@ mongoose.connect(MONGO_URI)
 // 4. API Routes (Yeh hamesha static files se pehle aayenge)
 app.use("/auth", authRoute);
 app.use("/user", reportRoute);
+app.use("/api/police", policeRoute);
 
 // --- YEH HAI SABSE ZAROORI BADLAV ---
 // 5. Static Frontend Files ko Serve Karna

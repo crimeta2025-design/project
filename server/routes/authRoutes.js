@@ -59,9 +59,17 @@ router.post('/register/user', async (req, res) => {
 // 2. Department Registration Request 
 router.post('/register/department', async (req, res) => {
     try {
-        const { name, email, password, contact_number, address, city, pincode, location } = req.body;
+        // 1. Frontend se latitude aur longitude ko bhi nikalein
+        const { 
+            name, email, password, contact_number, 
+            address, city, pincode, badge_number,
+            latitude, longitude 
+        } = req.body;
         
-
+        // Validation
+        if (!latitude || !longitude) {
+            return res.status(400).json({ msg: 'Location coordinates are required for police registration.' });
+        }
         if (await User.findOne({ email })) {
             return res.status(400).json({ msg: 'Department with this email already exists.' });
         }
@@ -72,28 +80,43 @@ router.post('/register/department', async (req, res) => {
         const hashedOtp = await bcrypt.hash(otp, salt);
 
         const user = new User({
-            name, email, password: hashedPassword, contact_number,
+            name,
+            email,
+            password: hashedPassword,
+            contact_number,
             role: 'police',
-            status: 'pending_verification', 
-            address, city, pincode, location,
+            status: 'pending_verification',
+            address,
+            city,
+            pincode,
+            badge_number,
+            
+            // 2. Yahan par Mongoose ke liye zaroori 'location' object banayein
+            location: {
+                type: 'Point',
+                coordinates: [parseFloat(longitude), parseFloat(latitude)]
+            },
+
             otp: hashedOtp,
             otpExpiry: Date.now() + 10 * 60 * 1000
         });
         await user.save();
 
-        await transporter.sendMail({
+         await transporter.sendMail({
             from: 'sj0855530@gmail.com', to: email,
             subject: 'Verify Your Department Account | Crime Reporter',
             html: `<h3>Your OTP is: ${otp}</h3>`
         });
 
-        res.status(201).json({ msg: 'Registration request sent! Please check your email for OTP.', email: email });
+        res.status(201).json({ msg: 'Registration request sent! Please check your email for OTP.', email: user.email });
     } catch (error) {
-        if (error.name === 'ValidationError') return res.status(400).json({ msg: error.message });
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({ msg: error.message });
+        }
+        console.error("Department Registration Error:", error);
         res.status(500).json({ error: error.message });
     }
 });
-
 
 // --- NEW ROUTE FOR VERIFICATION ---
 router.post('/verify-otp', async (req, res) => {

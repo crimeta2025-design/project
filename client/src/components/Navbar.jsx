@@ -19,7 +19,6 @@ import { useAuth } from '../contexts/AuthContext';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
-console.log("User object in Navbar:", user); 
 
   const location = useLocation();
   const navigate = useNavigate();

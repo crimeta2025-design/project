@@ -115,6 +115,45 @@ router.get('/my-reports', isAuthenticated, async (req, res) => {
     }
 });
 
+router.get('/all-reports', isAuthenticated, async (req, res) => {
+    try {
+        // Database se saari reports nikalo
+        const reports = await CrimeReport.find({})
+            .populate('reportedBy', 'name') // Agar reporter ka naam chahiye
+            .sort({ createdAt: -1 });
+        
+        res.status(200).json(reports);
+    } catch (error) {
+        console.error("Error fetching all reports:", error.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+
+router.get('/overview', isAuthenticated, async (req, res) => {
+    try {
+        const totalReports = await CrimeReport.countDocuments();
+        const resolvedCases = await CrimeReport.countDocuments({ status: 'resolved' });
+        const activeCases = await CrimeReport.countDocuments({ status: { $in: ['new', 'in_progress'] } });
+
+        // Reports by Type ka data calculate karein
+        const reportsByType = await CrimeReport.aggregate([
+            { $group: { _id: '$incidentType', count: { $sum: 1 } } },
+            { $sort: { count: -1 } }
+        ]);
+
+        res.json({
+            totalReports,
+            resolvedCases,
+            activeCases,
+            reportsByType
+        });
+    } catch (error) {
+        console.error("Error fetching stats:", error.message);
+        res.status(500).send('Server Error');
+    }
+});
+
 module.exports = router;
 
 

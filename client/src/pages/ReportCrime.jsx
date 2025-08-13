@@ -168,33 +168,38 @@ const ReportCrime = () => {
               <label className="block text-sm font-medium text-gray-900 mb-3">
                 Type of Incident *
               </label>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-                {crimeTypes.map((type) => (
-                  <label
-                    key={type}
-                    className={`p-3 rounded-lg border cursor-pointer transition-all duration-200 text-center ${
-                      formData.incidentType === type
-                        ? 'border-[#0028c9] bg-[#00C9A7]/10'
-                        : 'border-black bg-white hover:bg-gray-50'
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="incidentType"
-                      value={type}
-                      checked={formData.incidentType === type}
-                      onChange={handleChange}
-                      className="sr-only"
-                      required
-                    />
-                    <span className={`text-sm ${
-                      formData.incidentType === type ? 'text-black font-medium' : 'text-gray-900'
-                    }`}>
-                      {type}
-                    </span>
-                  </label>
-                ))}
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                {crimeTypes.map((type) => {
+                  const active = formData.incidentType === type;
+                  return (
+                    <label
+                      key={type}
+                      className={`rounded-lg border cursor-pointer transition-all duration-200 text-center flex items-center justify-center px-2 py-2 sm:py-3 min-h-[52px] sm:min-h-[60px] leading-tight ${
+                        active
+                          ? 'border-[#0028c9] bg-[#00C9A7]/10 shadow-sm'
+                          : 'border-black bg-white hover:bg-gray-50'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="incidentType"
+                        value={type}
+                        checked={active}
+                        onChange={handleChange}
+                        className="sr-only"
+                        required
+                        aria-label={type}
+                      />
+                      <span className={`break-words whitespace-normal text-[11px] xs:text-xs sm:text-sm font-medium ${
+                        active ? 'text-black' : 'text-gray-900 font-normal'
+                      }`}>
+                        {type}
+                      </span>
+                    </label>
+                  );
+                })}
               </div>
+              <div className="sm:hidden mt-2 text-[11px] text-gray-500">Tap a category. Long names wrap automatically.</div>
             </div>
 
             {/* Severity Level: Section from file 1 */}

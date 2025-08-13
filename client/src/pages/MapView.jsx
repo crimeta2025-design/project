@@ -1,18 +1,16 @@
 import React, { useState, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet.heat';
 import {
   MapPin,
-  Filter,
-  Calendar,
   BarChart3,
   AlertTriangle,
   Navigation,
   Target,
-  Layers
+  Layers,
+  Shield
 } from "lucide-react";
 
 // Fix for default Leaflet marker icons
@@ -285,30 +283,13 @@ const MapViewController = ({ mapView }) => {
   return null;
 };
 
-// Animation variants
-const fadeInUp = {
-  initial: { opacity: 0, y: 30 },
-  animate: { opacity: 1, y: 0, transition: { duration: 0.6 } },
-};
+// (Animations removed)
 
 // Government color scheme
 const GOV_BLUE = "#1e3a8a";
 const ACCENT_COLOR = "#00C9A7";
 
-// Filters configuration
-const FILTERS = [
-  { value: "all", label: "All Incidents", count: 8 },
-  { value: "theft", label: "Theft", count: 4 },
-  { value: "assault", label: "Assault", count: 2 },
-  { value: "robbery", label: "Robbery", count: 1 },
-  { value: "vandalism", label: "Vandalism", count: 1 },
-];
-
-const TIME_FILTERS = [
-  { value: "today", label: "Today" },
-  { value: "week", label: "This Week" },
-  { value: "month", label: "This Month" },
-];
+// (Removed filters/time filters per user request)
 
 // Tricolor bar component
 const TricolorBar = () => (
@@ -321,8 +302,7 @@ const TricolorBar = () => (
 
 export default function MapView() {
   // ------------ Enhanced state management -----------
-  const [selectedFilter, setSelectedFilter] = useState("all");
-  const [timeFilter, setTimeFilter] = useState("week");
+  // Removed Incident Type & Time Range filters per user request
   const [mapView, setMapView] = useState("street"); // Add map view state
   const [showHeatmap, setShowHeatmap] = useState(true); // Add heatmap toggle state
   const mapRef = useRef();
@@ -551,9 +531,8 @@ export default function MapView() {
   };
 
   // Filter incidents
-  const filteredIncidents = incidents.filter(
-    i => selectedFilter === "all" || i.type === selectedFilter
-  );
+  // Without filters all incidents are shown
+  const filteredIncidents = incidents;
 
   // Get user location on mount
   useEffect(() => {
@@ -581,13 +560,8 @@ export default function MapView() {
       <TricolorBar />
       
       {/* Header - Fixed height */}
-      <div className="flex-shrink-0 px-4 sm:px-6 py-4">
-        <motion.div
-          className="mb-4"
-          initial="initial"
-          animate="animate"
-          variants={fadeInUp}
-        >
+  <div className="hidden md:block flex-shrink-0 px-4 sm:px-6 py-4">
+        <div className="mb-4">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div className="flex items-center space-x-4">
               <MapPin className="w-8 h-8 lg:w-10 lg:h-10 text-[var(--accent-color,#00C9A7)]" />
@@ -686,77 +660,15 @@ export default function MapView() {
               )}
             </div>
           </div>
-        </motion.div>
+  </div>
       </div>
 
       {/* Main Content - Takes remaining height */}
       <div className="flex-1 overflow-hidden px-4 sm:px-6 pb-4">
         <div className="h-full flex gap-4">
-          {/* Sidebar - Collapsible on mobile */}
+          {/* Sidebar - Collapsible on mobile (filters removed) */}
           <aside className="hidden lg:flex lg:w-80 xl:w-96 flex-col gap-4 overflow-y-auto">
-            {/* Filters card */}
-            <section className="bg-white rounded-2xl border border-blue-100 shadow-md p-4">
-              <div className="flex items-center mb-4 gap-2">
-                <Filter className="w-5 h-5 text-blue-800" />
-                <h2 className="font-bold text-lg" style={{ color: GOV_BLUE }}>
-                  Incident Type
-                </h2>
-              </div>
-              <div className="grid grid-cols-1 gap-2">
-                {FILTERS.map((f) => (
-                  <button
-                    key={f.value}
-                    onClick={() => setSelectedFilter(f.value)}
-                    className={`flex justify-between items-center w-full px-4 py-3 rounded-lg transition-colors font-medium text-left
-                      ${
-                        selectedFilter === f.value
-                          ? "bg-blue-600 text-white"
-                          : "bg-blue-50 text-blue-900 hover:bg-blue-100"
-                      }`}
-                  >
-                    <span>{f.label}</span>
-                    <span
-                      className={`text-xs px-2 py-1 rounded-full 
-                        ${
-                          selectedFilter === f.value
-                            ? "bg-blue-500"
-                            : "bg-blue-200 text-blue-800"
-                        }`}
-                    >
-                      {f.count}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </section>
-
-            {/* Time filters */}
-            <section className="bg-white rounded-2xl border border-blue-100 shadow-md p-4">
-              <div className="flex items-center mb-4 gap-2">
-                <Calendar className="w-5 h-5 text-blue-800" />
-                <h2 className="font-bold text-lg" style={{ color: GOV_BLUE }}>
-                  Time Range
-                </h2>
-              </div>
-              <div className="grid grid-cols-1 gap-2">
-                {TIME_FILTERS.map((t) => (
-                  <button
-                    key={t.value}
-                    onClick={() => setTimeFilter(t.value)}
-                    className={`w-full px-4 py-3 rounded-lg transition-colors font-medium text-left
-                      ${
-                        timeFilter === t.value
-                          ? "bg-blue-600 text-white"
-                          : "bg-blue-50 text-blue-900 hover:bg-blue-100"
-                      }`}
-                  >
-                    {t.label}
-                  </button>
-                ))}
-              </div>
-            </section>
-
-            {/* Statistics */}
+            {/* Statistics (kept) */}
             <section className="bg-white rounded-2xl border border-blue-100 shadow-md p-4">
               <div className="flex items-center mb-4 gap-2">
                 <BarChart3 className="w-5 h-5 text-blue-800" />
@@ -830,87 +742,81 @@ export default function MapView() {
           {/* Main Map Area - Takes remaining space */}
           <main className="flex-1 flex flex-col">
             {/* Map container - Full height */}
-            <motion.section
+            <section
               className="flex-1 bg-white rounded-2xl border border-blue-100 shadow-md overflow-hidden flex flex-col"
-              initial="initial"
-              animate="animate"
-              variants={fadeInUp}
             >
-              <div className="flex-shrink-0 p-4 border-b border-blue-100">
-                <div className="flex items-center justify-between">
+              <div className="flex-shrink-0 p-3 border-b border-blue-100">
+                {/* Desktop Header */}
+                <div className="hidden sm:flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <MapPin className="w-5 h-5 text-blue-800" />
+                    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-600 via-blue-600 to-cyan-500 flex items-center justify-center shadow-md">
+                      <Shield className="w-4 h-4 text-white" />
+                    </div>
                     <h2 className="font-bold text-lg" style={{ color: GOV_BLUE }}>
                       Live Incident Map
                     </h2>
                   </div>
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 text-sm text-gray-600 whitespace-nowrap">
                       <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                       <span>Live Updates</span>
                     </div>
-                    
-                    {/* Map View Switcher */}
                     <div className="flex items-center gap-2">
                       <Layers className="w-4 h-4 text-blue-800" />
-                      <div className="flex bg-gray-100 rounded-lg p-1">
-                        <button
-                          onClick={() => setMapView("street")}
-                          className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
-                            mapView === "street"
-                              ? "bg-blue-600 text-white shadow-sm"
-                              : "text-gray-600 hover:text-gray-900"
-                          }`}
-                        >
-                          Street
-                        </button>
-                        <button
-                          onClick={() => setMapView("satellite")}
-                          className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
-                            mapView === "satellite"
-                              ? "bg-blue-600 text-white shadow-sm"
-                              : "text-gray-600 hover:text-gray-900"
-                          }`}
-                        >
-                          Satellite
-                        </button>
-                        <button
-                          onClick={() => setMapView("hybrid")}
-                          className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
-                            mapView === "hybrid"
-                              ? "bg-blue-600 text-white shadow-sm"
-                              : "text-gray-600 hover:text-gray-900"
-                          }`}
-                        >
-                          Hybrid
-                        </button>
-                        <button
-                          onClick={() => setMapView("terrain")}
-                          className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
-                            mapView === "terrain"
-                              ? "bg-blue-600 text-white shadow-sm"
-                              : "text-gray-600 hover:text-gray-900"
-                          }`}
-                        >
-                          Terrain
-                        </button>
+                      <div className="flex bg-gray-100 rounded-lg p-1 overflow-x-auto no-scrollbar">
+                        {['street','satellite','hybrid','terrain'].map(opt => (
+                          <button
+                            key={opt}
+                            onClick={() => setMapView(opt)}
+                            className={`px-3 py-1 text-xs font-medium rounded-md flex-shrink-0 transition-colors whitespace-nowrap ${mapView === opt ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}
+                          >
+                            {opt.charAt(0).toUpperCase()+opt.slice(1)}
+                          </button>
+                        ))}
                       </div>
                     </div>
-                    
-                    {/* Heatmap Toggle */}
+                    <button
+                      onClick={() => setShowHeatmap(h=>!h)}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${showHeatmap ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}
+                    >
+                      <div className={`w-2 h-2 rounded-full ${showHeatmap ? 'bg-white' : 'bg-red-600'}`}></div>
+                      {showHeatmap ? 'Heatmap ON' : 'Heatmap OFF'}
+                    </button>
+                  </div>
+                </div>
+                {/* Mobile Header */}
+                <div className="sm:hidden flex flex-col gap-2">
+                  <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => setShowHeatmap(!showHeatmap)}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                          showHeatmap
-                            ? "bg-red-600 hover:bg-red-700 text-white"
-                            : "bg-gray-100 hover:bg-gray-200 text-gray-700"
-                        }`}
-                      >
-                        <div className={`w-2 h-2 rounded-full ${showHeatmap ? "bg-white" : "bg-red-600"}`}></div>
-                        {showHeatmap ? "Heatmap ON" : "Heatmap OFF"}
-                      </button>
+                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-indigo-600 via-blue-600 to-cyan-500 flex items-center justify-center shadow">
+                        <Shield className="w-3.5 h-3.5 text-white" />
+                      </div>
+                      <h2 className="font-bold text-sm" style={{ color: GOV_BLUE }}>
+                        Live Map
+                      </h2>
                     </div>
+                    <div className="flex items-center gap-1 text-[10px] text-gray-600">
+                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                      <span>Live</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={mapView}
+                      onChange={e=>setMapView(e.target.value)}
+                      className="flex-1 bg-gray-100 border border-gray-200 rounded-md px-2 py-2 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    >
+                      <option value="street">Street</option>
+                      <option value="satellite">Satellite</option>
+                      <option value="hybrid">Hybrid</option>
+                      <option value="terrain">Terrain</option>
+                    </select>
+                    <button
+                      onClick={()=>setShowHeatmap(h=>!h)}
+                      className={`px-3 py-2 rounded-md text-xs font-medium whitespace-nowrap ${showHeatmap ? 'bg-red-600 text-white' : 'bg-gray-100 text-gray-700'}`}
+                    >
+                      {showHeatmap ? 'Heatmap ON' : 'Heatmap OFF'}
+                    </button>
                   </div>
                 </div>
               </div>
@@ -1086,6 +992,27 @@ export default function MapView() {
                     })}
                   </MapContainer>
                 )}
+                {/* Mobile floating controls */}
+                <div className="sm:hidden absolute bottom-24 right-4 flex flex-col gap-3 z-[9500]">
+                  {isTracking && userLocation && (
+                    <button
+                      onClick={centerOnUserLocation}
+                      aria-label="Center on my location"
+                      className="p-4 rounded-full bg-gradient-to-br from-amber-400 via-orange-500 to-red-500 text-white shadow-[0_4px_12px_rgba(0,0,0,0.35)] ring-2 ring-white/70 active:scale-95 transition-all"
+                    >
+                      <Navigation className="w-5 h-5 drop-shadow" />
+                    </button>
+                  )}
+                  {!isTracking && (
+                    <button
+                      onClick={startLocationTracking}
+                      aria-label="Start location tracking"
+                      className="px-5 py-2.5 rounded-full bg-gradient-to-r from-emerald-500 via-green-500 to-lime-400 text-white text-xs font-semibold shadow-[0_4px_12px_rgba(0,0,0,0.35)] ring-2 ring-white/70 active:scale-95 tracking-wide"
+                    >
+                      Start GPS
+                    </button>
+                  )}
+                </div>
               </div>
 
               {/* Map footer with controls */}
@@ -1110,34 +1037,12 @@ export default function MapView() {
                   </div>
                 </div>
               </div>
-            </motion.section>
+            </section>
           </main>
         </div>
       </div>
 
-      {/* Mobile Filters - Floating overlay */}
-      <div className="lg:hidden fixed bottom-4 left-4 right-4 z-50">
-        <div className="bg-white rounded-2xl border border-blue-100 shadow-lg p-4">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex gap-2 flex-wrap">
-              {FILTERS.map((f) => (
-                <button
-                  key={f.value}
-                  onClick={() => setSelectedFilter(f.value)}
-                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors
-                    ${
-                      selectedFilter === f.value
-                        ? "bg-blue-600 text-white"
-                        : "bg-blue-50 text-blue-900 hover:bg-blue-100"
-                    }`}
-                >
-                  {f.label} ({f.count})
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
+  {/* Removed mobile filters overlay per user request */}
     </div>
   );
 }

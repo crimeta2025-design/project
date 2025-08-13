@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import PropTypes from 'prop-types';
 import {
@@ -117,33 +117,64 @@ StatCard.propTypes = {
 };
 
 // ====== Department Overview Section ======
-const DepartmentOverview = ({ stats }) => (
-  <div className="bg-white rounded-lg border-2 border-blue-800 shadow p-6">
-    <h2 className="text-lg font-bold text-[#204080] mb-2 flex items-center"><BadgePercent className="w-5 h-5 mr-2" />Department Overview</h2>
-    <table className="w-full text-left text-[#204080]">
-      <thead>
-        <tr className="text-xs uppercase bg-blue-100">
-          <th className="py-2 px-2">Department</th>
-          <th className="py-2 px-2">Members</th>
-          <th className="py-2 px-2">Open Cases</th>
-          <th className="py-2 px-2">Resolved</th>
-          <th className="py-2 px-2">Satisfaction</th>
-        </tr>
-      </thead>
-      <tbody>
-        {stats.map((s, i) => (
-          <tr key={i} className="border-b">
-            <td className="py-2 px-2">{s.dept}</td>
-            <td className="py-2 px-2">{s.members}</td>
-            <td className="py-2 px-2">{s.openCases}</td>
-            <td className="py-2 px-2">{s.resolved}</td>
-            <td className="py-2 px-2">{s.satisfaction}%</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-);
+const DepartmentOverview = ({ stats }) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="bg-white rounded-lg border-2 border-blue-800 shadow p-0 sm:p-6">
+      {/* Mobile accordion header */}
+      <button
+        type="button"
+        className="w-full flex sm:hidden items-center justify-between px-4 py-4 focus:outline-none focus:ring-2 focus:ring-blue-600 rounded-t-lg"
+        onClick={() => setOpen(o => !o)}
+        aria-expanded={open}
+      >
+        <span className="flex items-center font-semibold text-[#204080] text-base"><BadgePercent className="w-5 h-5 mr-2" />Department Overview</span>
+        {open ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+      </button>
+      <h2 className="hidden sm:flex items-center text-lg font-bold text-[#204080] mb-2"><BadgePercent className="w-5 h-5 mr-2" />Department Overview</h2>
+      <div className={`sm:block ${open ? 'block' : 'hidden'} sm:!block`}> 
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-[#204080] min-w-[520px]">
+            <thead>
+              <tr className="text-xs uppercase bg-blue-100">
+                <th className="py-2 px-2">Department</th>
+                <th className="py-2 px-2">Members</th>
+                <th className="py-2 px-2">Open</th>
+                <th className="py-2 px-2">Resolved</th>
+                <th className="py-2 px-2">Satisfaction</th>
+              </tr>
+            </thead>
+            <tbody>
+              {stats.map((s, i) => (
+                <tr key={i} className="border-b last:border-b-0">
+                  <td className="py-2 px-2 text-sm font-medium">{s.dept}</td>
+                  <td className="py-2 px-2 text-sm">{s.members}</td>
+                  <td className="py-2 px-2 text-sm">{s.openCases}</td>
+                  <td className="py-2 px-2 text-sm">{s.resolved}</td>
+                  <td className="py-2 px-2 text-sm">{s.satisfaction}%</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {/* Mobile card view (for very narrow screens) */}
+        <div className="sm:hidden divide-y border-t mt-2">
+          {stats.map((s, i) => (
+            <div key={i} className="p-4 flex flex-col gap-1 text-sm">
+              <div className="font-semibold text-[#204080]">{s.dept}</div>
+              <div className="flex flex-wrap gap-3 text-xs text-[#204080]/80">
+                <span><span className="font-medium">Members:</span> {s.members}</span>
+                <span><span className="font-medium">Open:</span> {s.openCases}</span>
+                <span><span className="font-medium">Resolved:</span> {s.resolved}</span>
+                <span><span className="font-medium">Satisfaction:</span> {s.satisfaction}%</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 DepartmentOverview.propTypes = { stats: PropTypes.array };
 
@@ -239,20 +270,20 @@ const Dashboard = () => {
 
   // ================ RENDER ================
   return (
-    <div className="min-h-screen bg-gray-50 text-black">
+  <div className="min-h-screen bg-gray-50 text-black">
       {/* SCHEME STRIPE FOR GOVERNMENT LOOK */}
  
 
       {/* Main content */}
-      <div className="max-w-full mx-auto ">
+  <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header User Card */}
         <motion.div className="mb-8" initial="initial" animate="animate" variants={fadeInUp}>
-          <div className={`rounded-lg p-6 border-2 shadow flex flex-col sm:flex-row sm:items-center gap-6 ${getRoleClass(user?.role, true)}`}>
+      <div className={`rounded-lg p-5 sm:p-6 border-2 shadow flex flex-col sm:flex-row sm:items-center gap-6 ${getRoleClass(user?.role, true)}`}>
             <div className={`p-4 rounded-full ${getRoleClass(user?.role)}`}>
               <Shield className={`w-10 h-10 ${user?.role === 'police' ? 'text-[#204080]' : 'text-white'}`} />
             </div>
             <div>
-              <h1 className="text-3xl font-bold mb-1">{`Welcome,  ${user?.name || 'Guest'}`}</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold mb-1 leading-tight">{`Welcome,  ${user?.name || 'Guest'}`}</h1>
               <p className={`font-medium ${user?.role === 'citizen' ? 'text-green-700'
                 : user?.role === 'police' ? 'text-yellow-700'
                   : 'text-red-700'
@@ -281,44 +312,42 @@ const Dashboard = () => {
         </motion.div>
 
         {/* "Reports by Type" and "Department Overview" row */}
-        <div className="grid lg:grid-cols-2 gap-8 mb-8">
+  <div className="grid gap-6 lg:gap-8 lg:grid-cols-2 mb-8">
           <ReportsByType data={REPORT_TYPES} />
           <DepartmentOverview stats={FAKE_DEPARTMENT_STATS} />
         </div>
 
         {/* Main content row (Reports, Quick Actions, Activity) */}
-        <div className="grid lg:grid-cols-3 gap-8">
+  <div className="grid gap-6 lg:gap-8 lg:grid-cols-3">
           {/* Recent Reports */}
           <motion.div className="lg:col-span-2" initial="initial" animate="animate" variants={fadeInUp}>
-            <div className="bg-white rounded-lg border-2 border-blue-800 shadow p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-[#204080]">Recent Reports</h2>
-                <button className="text-sm font-semibold transition-colors text-blue-800 hover:text-yellow-700">View All</button>
+            <div className="bg-white rounded-lg border-2 border-blue-800 shadow p-5 sm:p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+                <h2 className="text-lg sm:text-xl font-bold text-[#204080]">Recent Reports</h2>
+                <button className="self-start sm:self-auto text-sm font-semibold transition-colors text-blue-800 hover:text-yellow-700">View All</button>
               </div>
 
               <div className="space-y-4">
                 {recentReports.map((report) => (
                   <div key={report.id}
                     className="bg-[#e5edfa] rounded-lg p-4 border border-[#c4d2ee] hover:bg-[#eef4fb] transition-all duration-200">
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
                       <div className="flex items-center space-x-3">
                         <div className={`w-3 h-3 rounded-full ${getSeverityColor(report.severity)}`}></div>
-                        <h3 className="text-[#204080] font-semibold">{report.type}</h3>
+                        <h3 className="text-[#204080] font-semibold text-sm sm:text-base">{report.type}</h3>
                       </div>
-                      <span className={`px-2 py-1 rounded-full text-xs border font-semibold capitalize ${getStatusColor(report.status)}`}>
+                      <span className={`inline-block w-fit px-2 py-1 rounded-full text-[10px] sm:text-xs border font-semibold capitalize ${getStatusColor(report.status)}`}>
                         {report.status}
                       </span>
                     </div>
-                    <div className="flex items-center justify-between text-sm text-[#204080]/75">
-                      <div className="flex items-center space-x-4">
-                        <div className="flex items-center space-x-1">
-                          <MapPin className="w-4 h-4" />
-                          <span>{report.location}</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <Clock className="w-4 h-4" />
-                          <span>{report.time}</span>
-                        </div>
+                    <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs sm:text-sm text-[#204080]/75">
+                      <div className="flex items-center space-x-1">
+                        <MapPin className="w-4 h-4" />
+                        <span className="truncate max-w-[140px] sm:max-w-none">{report.location}</span>
+                      </div>
+                      <div className="flex items-center space-x-1">
+                        <Clock className="w-4 h-4" />
+                        <span>{report.time}</span>
                       </div>
                     </div>
                   </div>
@@ -331,7 +360,7 @@ const Dashboard = () => {
           <motion.div className="space-y-6" initial="initial" animate="animate" variants={fadeInUp}>
 
             {/* Quick Actions */}
-            <div className={`bg-white rounded-lg border-2 border-yellow-700 shadow p-6`}>
+            <div className={`bg-white rounded-lg border-2 border-yellow-700 shadow p-5 sm:p-6`}>
               <h2 className="text-xl font-bold text-[#204080] mb-4">Quick Actions</h2>
               <div className="space-y-3">
                 {user?.role === 'citizen' && (
@@ -371,8 +400,8 @@ const Dashboard = () => {
             </div>
 
             {/* Recent Activity */}
-            <div className="bg-white rounded-lg border-2 border-blue-800 shadow p-6">
-              <h2 className="text-xl font-bold text-[#204080] mb-4">Recent Activity</h2>
+            <div className="bg-white rounded-lg border-2 border-blue-800 shadow p-5 sm:p-6">
+              <h2 className="text-lg sm:text-xl font-bold text-[#204080] mb-4">Recent Activity</h2>
               <div className="space-y-3">
                 {activity.map((act, idx) => (
                   <div className="flex items-start space-x-3" key={idx}>

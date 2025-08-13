@@ -64,7 +64,8 @@ const PublicRoute = ({ children }) => {
   }
   
   if (user) {
-    return <Navigate to="/dashboard" replace />;
+    const target = user.role === 'citizen' ? '/my-reports' : '/dashboard';
+    return <Navigate to={target} replace />;
   }
   
   return children;
@@ -99,7 +100,7 @@ function AppContent() {
           <Route path="/police" element={<PoliceRoute><PolicePanel /></PoliceRoute>} />
           <Route path="/admin" element={<ProtectedRoute adminOnly={true}><AdminPanel /></ProtectedRoute>} />
           
-          <Route path="*" element={<Navigate to={user ? "/dashboard" : "/"} replace />} />
+          <Route path="*" element={<Navigate to={user ? (user.role === 'citizen' ? '/my-reports' : '/dashboard') : '/'} replace />} />
         </Routes>
       </main>
       

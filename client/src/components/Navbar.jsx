@@ -46,6 +46,8 @@ const Navbar = () => {
     ] : [])
   ];
 
+  // Mobile drawer simple CSS animation handled via utility classes
+
   return (
     <nav className="bg-white border-b-4 border-white">
         <div className="max-w-7xl mx-auto flex justify-between items-center px-4 sm:px-8 py-3">
@@ -124,10 +126,8 @@ const Navbar = () => {
         </div>
         {/* Mobile Navigation Drawer */}
         {isMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -24 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="md:hidden bg-white px-4 border-t border-blue-50"
+          <div
+            className="md:hidden bg-white px-4 border-t border-blue-50 shadow-lg animate-fade-slide-down"
           >
             <div className="py-4 space-y-1">
               {navItems.map(item => {
@@ -181,7 +181,7 @@ const Navbar = () => {
                 <span>Logout</span>
               </button>
             </div>
-          </motion.div>
+          </div>
         )}
       </nav>
   );

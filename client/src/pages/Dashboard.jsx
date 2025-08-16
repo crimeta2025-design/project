@@ -133,8 +133,9 @@ const DepartmentOverview = ({ stats }) => {
       </button>
       <h2 className="hidden sm:flex items-center text-lg font-bold text-[#204080] mb-2"><BadgePercent className="w-5 h-5 mr-2" />Department Overview</h2>
       <div className={`sm:block ${open ? 'block' : 'hidden'} sm:!block`}> 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-[#204080] min-w-[520px]">
+        {/* DepartmentOverview table wrapper */}
+        <div className="w-full overflow-x-auto">
+          <table className="w-full text-left text-[#204080] min-w-[320px] sm:min-w-[520px]">
             <thead>
               <tr className="text-xs uppercase bg-blue-100">
                 <th className="py-2 px-2">Department</th>
@@ -180,7 +181,7 @@ DepartmentOverview.propTypes = { stats: PropTypes.array };
 
 // ====== Reports By Type Section (with icons) ======
 const ReportsByType = ({ data }) => (
-  <div className="bg-white rounded-lg border-2 border-yellow-700 shadow p-6 mb-6">
+  <div className="bg-white rounded-lg border-2 border-yellow-700 shadow p-6 mb-6 w-full min-w-[220px]">
     <h2 className="text-lg font-bold text-[#204080] mb-4 flex items-center"><BarChart3 className="w-5 h-5 mr-2" />Reports by Type</h2>
     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
       {data.map((r, i) => {
@@ -312,9 +313,13 @@ const Dashboard = () => {
         </motion.div>
 
         {/* "Reports by Type" and "Department Overview" row */}
-  <div className="grid gap-6 lg:gap-8 lg:grid-cols-2 mb-8">
-          <ReportsByType data={REPORT_TYPES} />
-          <DepartmentOverview stats={FAKE_DEPARTMENT_STATS} />
+  <div className="grid gap-6 lg:gap-8 grid-cols-1 lg:grid-cols-2 mb-8">
+          <div className="w-full overflow-x-auto">
+            <ReportsByType data={REPORT_TYPES} />
+          </div>
+          <div className="w-full overflow-x-auto">
+            <DepartmentOverview stats={FAKE_DEPARTMENT_STATS} />
+          </div>
         </div>
 
         {/* Main content row (Reports, Quick Actions, Activity) */}

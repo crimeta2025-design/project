@@ -348,7 +348,8 @@ const ReportCrime = () => {
               )}
             </div>
             
-            {/* Anonymous Checkbox: UI styled for light theme */}
+            {/*
+            Anonymous Checkbox: UI styled for light theme
             <div className="flex items-center space-x-3">
               <input 
                 type="checkbox" 
@@ -360,6 +361,7 @@ const ReportCrime = () => {
               />
               <label htmlFor="isAnonymous" className="text-sm text-gray-900">Submit this report anonymously</label>
             </div>
+            */}
 
             {/* Submit Button: UI from file 1, logic from file 2, text color changed for contrast */}
             <motion.button

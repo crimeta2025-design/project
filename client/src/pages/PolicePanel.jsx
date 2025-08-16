@@ -312,39 +312,40 @@ const PolicePanel = () => {
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: -10 }}
                                     transition={{ duration: 0.35 }}
-                                    className="mx-6 my-4 rounded-xl shadow-lg border border-blue-300 bg-gradient-to-br from-blue-50 via-white to-blue-100 p-6 flex flex-col md:flex-row gap-6"
+                                    className="mx-2 sm:mx-4 my-4 rounded-xl shadow-lg border border-blue-300 bg-gradient-to-br from-blue-50 via-white to-blue-100 p-4 sm:p-6 flex flex-col md:flex-row gap-4 md:gap-6"
+                                    style={{ minWidth: 0 }}
                                   >
-                                    <div className="flex-1 flex flex-col gap-3">
-                                      <div className="flex items-center gap-2 mb-2">
+                                    <div className="flex-1 flex flex-col gap-3 min-w-0">
+                                      <div className="flex flex-wrap items-center gap-2 mb-2">
                                         <FileText className="w-5 h-5 text-blue-700" />
-                                        <span className="font-bold text-lg text-blue-900">{caseItem.incidentType}</span>
-                                        <span className="ml-2 text-xs text-gray-500">ID: {caseItem._id.slice(-6)}</span>
+                                        <span className="font-bold text-base sm:text-lg text-blue-900">{caseItem.incidentType}</span>
+                                        <span className="ml-2 text-xs text-gray-500 break-all">ID: {caseItem._id.slice(-6)}</span>
                                       </div>
-                                      <div className="flex items-center gap-2">
+                                      <div className="flex flex-wrap items-center gap-2">
                                         <BarChart3 className="w-4 h-4 text-orange-500" />
                                         <span className={`px-2 py-1 rounded-full text-xs font-semibold border ${getPriorityColor(caseItem.priority)}`}>{caseItem.priority || 'Normal'}</span>
                                         <span className={`ml-2 px-2 py-1 rounded-full text-xs font-semibold border capitalize ${getStatusColor(caseItem.status)}`}>{caseItem.status}</span>
                                         <span className={`ml-2 px-2 py-1 rounded-full text-xs font-semibold border ${getSeverityColor(caseItem.severity)}`}>{caseItem.severity}</span>
                                       </div>
-                                      <div className="flex items-center gap-2">
+                                      <div className="flex flex-wrap items-center gap-2">
                                         <MapPin className="w-4 h-4 text-blue-600" />
-                                        <span className="font-medium text-gray-700">{caseItem.locationAddress}</span>
+                                        <span className="font-medium text-gray-700 break-words max-w-full">{caseItem.locationAddress}</span>
                                       </div>
-                                      <div className="flex items-center gap-2">
+                                      <div className="flex flex-wrap items-center gap-2">
                                         <Shield className="w-4 h-4 text-blue-700" />
                                         <span className="font-medium text-gray-700">Reported By: {caseItem.reportedBy ? caseItem.reportedBy.name : 'Anonymous'}</span>
                                       </div>
-                                      <div className="flex items-center gap-2">
+                                      <div className="flex flex-wrap items-center gap-2">
                                         <Clock className="w-4 h-4 text-gray-500" />
                                         <span className="font-medium text-gray-700">Reported At: {caseItem.reportedAt ? new Date(caseItem.reportedAt).toLocaleString() : 'N/A'}</span>
                                       </div>
                                     </div>
-                                    <div className="flex-1 flex flex-col gap-3">
+                                    <div className="flex-1 flex flex-col gap-3 min-w-0">
                                       <div className="font-semibold text-blue-800 mb-1 flex items-center gap-2">
                                         <FileText className="w-4 h-4 text-blue-700" />
                                         Description
                                       </div>
-                                      <div className="text-gray-700 text-sm bg-white rounded-lg p-3 border border-blue-100 shadow-sm">
+                                      <div className="text-gray-700 text-sm bg-white rounded-lg p-3 border border-blue-100 shadow-sm overflow-x-auto max-w-full" style={{ wordBreak: 'break-word' }}>
                                         {caseItem.description || 'No description provided.'}
                                       </div>
                                       {/* Add more fields or actions here if needed */}

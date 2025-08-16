@@ -18,7 +18,8 @@ const PolicePanel = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // --- CHANGE: Backend se data fetch karne ke liye useEffect ---
+  // Track expanded case
+  const [expandedCaseId, setExpandedCaseId] = useState(null);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -260,43 +261,100 @@ const PolicePanel = () => {
                     <tbody>
                       {/* --- CHANGE: Cases ko real data se display karein --- */}
                       {filteredCases.map((caseItem, index) => (
-                        <tr key={caseItem._id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center space-x-3">
-                              <div className={`w-3 h-3 rounded-full ${getSeverityColor(caseItem.severity)}`}></div>
-                              <div>
-                                <div className="text-[#204080] font-semibold">{caseItem.incidentType}</div>
-                                <div className="text-gray-500 text-xs">...{caseItem._id.slice(-6)}</div>
+                        <React.Fragment key={caseItem._id}>
+                          <tr
+                            className={`cursor-pointer transition-colors duration-100 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} ${expandedCaseId === caseItem._id ? 'ring-2 ring-blue-300' : ''}`}
+                            onClick={() => setExpandedCaseId(expandedCaseId === caseItem._id ? null : caseItem._id)}
+                            aria-label={expandedCaseId === caseItem._id ? 'Hide details' : 'Show details'}
+                          >
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex items-center space-x-3">
+                                <div className={`w-3 h-3 rounded-full ${getSeverityColor(caseItem.severity)}`}></div>
+                                <div>
+                                  <div className="text-[#204080] font-semibold">{caseItem.incidentType}</div>
+                                  <div className="text-gray-500 text-xs">...{caseItem._id.slice(-6)}</div>
+                                </div>
                               </div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-gray-700">
-                            {caseItem.reportedBy ? caseItem.reportedBy.name : 'Anonymous'}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center space-x-1 text-gray-700">
-                              <MapPin className="w-4 h-4 text-blue-600" />
-                              <span className="max-w-[180px] truncate md:max-w-none">{caseItem.locationAddress}</span>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs border font-medium ${getPriorityColor(caseItem.priority)}`}>
-                              {caseItem.priority || 'Normal'}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs border font-medium capitalize ${getStatusColor(caseItem.status)}`}>
-                              {getStatusIcon(caseItem.status)}
-                              <span>{caseItem.status}</span>
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center space-x-2">
-                              <button className="text-blue-700 hover:text-blue-900"><Eye className="w-4 h-4" /></button>
-                              <button className="text-yellow-600 hover:text-yellow-700"><Edit className="w-4 h-4" /></button>
-                            </div>
-                          </td>
-                        </tr>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-gray-700">
+                              {caseItem.reportedBy ? caseItem.reportedBy.name : 'Anonymous'}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex items-center space-x-1 text-gray-700">
+                                <MapPin className="w-4 h-4 text-blue-600" />
+                                <span className="max-w-[180px] truncate md:max-w-none">{caseItem.locationAddress}</span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs border font-medium ${getPriorityColor(caseItem.priority)}`}>
+                                {caseItem.priority || 'Normal'}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs border font-medium capitalize ${getStatusColor(caseItem.status)}`}>
+                                {getStatusIcon(caseItem.status)}
+                                <span>{caseItem.status}</span>
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex items-center space-x-2">
+                                {/* Eye icon removed as only trigger; Edit remains */}
+                                <button className="text-yellow-600 hover:text-yellow-700"><Edit className="w-4 h-4" /></button>
+                              </div>
+                            </td>
+                          </tr>
+                          {expandedCaseId === caseItem._id && (
+                            <tr>
+                              <td colSpan={6} className="p-0 border-t border-blue-200">
+                                <div className="relative">
+                                  <motion.div
+                                    initial={{ opacity: 0, y: -10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -10 }}
+                                    transition={{ duration: 0.35 }}
+                                    className="mx-6 my-4 rounded-xl shadow-lg border border-blue-300 bg-gradient-to-br from-blue-50 via-white to-blue-100 p-6 flex flex-col md:flex-row gap-6"
+                                  >
+                                    <div className="flex-1 flex flex-col gap-3">
+                                      <div className="flex items-center gap-2 mb-2">
+                                        <FileText className="w-5 h-5 text-blue-700" />
+                                        <span className="font-bold text-lg text-blue-900">{caseItem.incidentType}</span>
+                                        <span className="ml-2 text-xs text-gray-500">ID: {caseItem._id.slice(-6)}</span>
+                                      </div>
+                                      <div className="flex items-center gap-2">
+                                        <BarChart3 className="w-4 h-4 text-orange-500" />
+                                        <span className={`px-2 py-1 rounded-full text-xs font-semibold border ${getPriorityColor(caseItem.priority)}`}>{caseItem.priority || 'Normal'}</span>
+                                        <span className={`ml-2 px-2 py-1 rounded-full text-xs font-semibold border capitalize ${getStatusColor(caseItem.status)}`}>{caseItem.status}</span>
+                                        <span className={`ml-2 px-2 py-1 rounded-full text-xs font-semibold border ${getSeverityColor(caseItem.severity)}`}>{caseItem.severity}</span>
+                                      </div>
+                                      <div className="flex items-center gap-2">
+                                        <MapPin className="w-4 h-4 text-blue-600" />
+                                        <span className="font-medium text-gray-700">{caseItem.locationAddress}</span>
+                                      </div>
+                                      <div className="flex items-center gap-2">
+                                        <Shield className="w-4 h-4 text-blue-700" />
+                                        <span className="font-medium text-gray-700">Reported By: {caseItem.reportedBy ? caseItem.reportedBy.name : 'Anonymous'}</span>
+                                      </div>
+                                      <div className="flex items-center gap-2">
+                                        <Clock className="w-4 h-4 text-gray-500" />
+                                        <span className="font-medium text-gray-700">Reported At: {caseItem.reportedAt ? new Date(caseItem.reportedAt).toLocaleString() : 'N/A'}</span>
+                                      </div>
+                                    </div>
+                                    <div className="flex-1 flex flex-col gap-3">
+                                      <div className="font-semibold text-blue-800 mb-1 flex items-center gap-2">
+                                        <FileText className="w-4 h-4 text-blue-700" />
+                                        Description
+                                      </div>
+                                      <div className="text-gray-700 text-sm bg-white rounded-lg p-3 border border-blue-100 shadow-sm">
+                                        {caseItem.description || 'No description provided.'}
+                                      </div>
+                                      {/* Add more fields or actions here if needed */}
+                                    </div>
+                                  </motion.div>
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </React.Fragment>
                       ))}
                     </tbody>
                   </table>

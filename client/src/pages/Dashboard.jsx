@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import PropTypes from 'prop-types';
 import {
@@ -204,6 +204,9 @@ ReportsByType.propTypes = { data: PropTypes.array };
 const Dashboard = () => {
   const { user } = useAuth();
 
+  // Welcome popup state
+  const [showWelcome, setShowWelcome] = useState(true); // Always show on first render
+
   // ----- Stats Data -----
   const stats = useMemo(() => ([
     {
@@ -272,6 +275,28 @@ const Dashboard = () => {
   // ================ RENDER ================
   return (
   <div className="min-h-screen bg-gray-50 text-black">
+      {/* Welcome Popup Modal */}
+      {showWelcome && (
+        <div className="absolute inset-0 z-[9999] flex items-center justify-center">
+          <div className="bg-white rounded-2xl shadow-2xl border-2 border-blue-800 p-8 max-w-sm w-full text-center relative animate-fadeIn">
+            <button
+              className="absolute top-3 right-3 text-blue-800 hover:text-red-500 text-xl font-bold"
+              onClick={() => setShowWelcome(false)}
+              aria-label="Close"
+            >
+              &times;
+            </button>
+            <img src="https://i.pinimg.com/originals/7e/2b/7a/7e2b7a2e6e2e2e2e2e2e2e2e2e2e2e2e.png" alt="Namaste Welcome" className="w-32 h-32 mx-auto mb-4" style={{objectFit: 'contain'}} />
+            <h2 className="text-2xl font-bold mb-2">Welcome!</h2>
+            <p className="text-gray-700 mb-4">You have successfully logged in to the Crimeta.<br />Namaste! Stay safe and help keep your community secure.</p>
+            <button
+              className="mt-2 px-6 py-2 bg-blue-700 text-white rounded-lg font-semibold shadow hover:bg-blue-800 transition"
+              onClick={() => setShowWelcome(false)}
+            >Continue</button>
+          </div>
+        </div>
+      )}
+
       {/* SCHEME STRIPE FOR GOVERNMENT LOOK */}
  
 
@@ -442,3 +467,21 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
+
+
+
+
+
+
+
+
+// import PoliceDashboard from "./PoliceDashboard";
+
+// const Dashboard = () => {
+//   return <PoliceDashboard />;
+// };
+
+// export default Dashboard;
+
+

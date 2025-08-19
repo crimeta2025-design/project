@@ -200,6 +200,27 @@ const ReportCrime = () => {
                 })}
               </div>
               <div className="sm:hidden mt-2 text-[11px] text-gray-500">Tap a category. Long names wrap automatically.</div>
+              
+              {/* Special description for 'Other' incident type */}
+              {formData.incidentType === 'Other' && (
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-gray-900 mb-2">
+                    Please describe the Other type of incident (required)
+                  </label>
+                  <div className="relative">
+                    <FileText className="absolute left-3 top-3 w-5 h-5 text-gray-800" />
+                    <textarea
+                      name="description"
+                      value={formData.description}
+                      onChange={handleChange}
+                      required
+                      rows={4}
+                      className="w-full pl-10 pr-4 py-3 bg-white border border-black rounded-lg text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#00C9A7] focus:border-transparent transition-all duration-200 resize-none"
+                      placeholder="Describe the specific Other type of incident..."
+                    />
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Severity Level: Section from file 1 */}

@@ -16,6 +16,7 @@ import Chatbot from './components/Chatbot';
 
 import ForgotPassword from './pages/ForgetPassword';
 import ResetPassword from './pages/ResetPassword';
+import PoliceDashboard from './pages/PoliceDashboard';
 
 
 const ProtectedRoute = ({ children, adminOnly = false }) => {
@@ -115,6 +116,11 @@ function App() {
     <AuthProvider>
       <Router>
         <AppContent />
+        <Routes>
+          <Route path="/" element={<PoliceDashboard />} />
+          <Route path="/mapview" element={<MapView />} />
+          {/* Add other routes as needed */}
+        </Routes>
       </Router>
     </AuthProvider>
   );

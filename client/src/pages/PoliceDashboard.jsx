@@ -14,6 +14,17 @@ import {
   Shield,
   Menu
 } from "lucide-react";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
+
+// Fix for default Leaflet marker icons
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
+  iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
+  shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
+});
 
 const navLinks = [
   { name: "Police Panel", icon: <Shield className="w-5 h-5" />, section: "policePanel" },
@@ -260,28 +271,28 @@ const PoliceDashboard = () => {
                         <div className="text-xl lg:text-2xl font-bold">214</div>
                         <div className="text-sm text-gray-500">Total Active Officers</div>
                       </div>
-                      <div className="w-full lg:w-80 h-32 lg:h-40 bg-gray-50 rounded-lg flex items-center justify-center p-4">
-                        <svg viewBox="0 0 400 200" className="w-full h-full opacity-60">
-                          <g fill="#9CA3AF">
-                            {/* North Division */}
-                            <path d="M50 60 L80 50 L120 55 L140 70 L130 90 L100 95 L70 85 Z" />
-                            {/* South Division */}
-                            <path d="M90 100 L110 95 L120 120 L115 150 L100 155 L85 140 L80 120 Z" />
-                            {/* East Division */}
-                            <path d="M160 50 L180 45 L190 55 L185 70 L170 75 L155 65 Z" />
-                            {/* West Division */}
-                            <path d="M150 80 L180 75 L190 90 L185 130 L170 140 L155 135 L145 110 Z" />
-                            {/* Central Division */}
-                            <path d="M200 40 L280 35 L320 50 L340 70 L330 90 L300 95 L250 85 L220 75 L190 65 Z" />
-                            {/* Special Unit */}
-                            <path d="M280 120 L320 115 L340 125 L335 140 L310 145 L285 135 Z" />
-                          </g>
-                          {/* Active officer dots */}
-                          <circle cx="100" cy="70" r="3" fill="#3B82F6" />
-                          <circle cx="170" cy="60" r="2" fill="#3B82F6" />
-                          <circle cx="250" cy="65" r="4" fill="#3B82F6" />
-                          <circle cx="300" cy="130" r="2" fill="#3B82F6" />
-                        </svg>
+                      {/* Responsive, interactive map showing police stations */}
+                      <div className="w-full lg:w-[500px] bg-gray-50 rounded-lg overflow-hidden p-0" style={{ height: "400px" }}>
+                        <MapContainer
+                          center={[21.1458, 79.0882]}
+                          zoom={12}
+                          style={{ width: "100%", height: "100%" }}
+                          scrollWheelZoom={true}
+                        >
+                          <TileLayer
+                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                            attribution="&copy; OpenStreetMap contributors"
+                          />
+                          <Marker position={[21.1702, 79.0571]}>
+                            <Popup>Police Station 1</Popup>
+                          </Marker>
+                          <Marker position={[21.1300, 79.0900]}>
+                            <Popup>Police Station 2</Popup>
+                          </Marker>
+                          <Marker position={[21.1600, 79.1000]}>
+                            <Popup>Police Station 3</Popup>
+                          </Marker>
+                        </MapContainer>
                       </div>
                     </div>
                     <div className="flex flex-wrap items-center gap-3 lg:gap-4 text-sm">

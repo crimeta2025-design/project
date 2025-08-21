@@ -17,6 +17,7 @@ import {
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import { Link } from "react-router-dom";
 
 // Fix for default Leaflet marker icons
 delete L.Icon.Default.prototype._getIconUrl;
@@ -27,11 +28,11 @@ L.Icon.Default.mergeOptions({
 });
 
 const navLinks = [
-  { name: "Police Panel", icon: <Shield className="w-5 h-5" />, section: "policePanel" },
+  { name: "Police Panel", icon: <Shield className="w-5 h-5" />, to: "/policepanel" },
   { name: "Dashboard", icon: <Home className="w-5 h-5" />, section: "dashboard" },
   { name: "Cases", icon: <FileText className="w-5 h-5" />, section: "cases" },
   { name: "Reports", icon: <BarChart className="w-5 h-5" />, section: "reports" },
-  { name: "Map View", icon: <Map className="w-5 h-5" />, section: "mapView" },
+  { name: "Map View", icon: <Map className="w-5 h-5" />, to: "/mapview" },
 ];
 
 const bottomLinks = [
@@ -61,22 +62,34 @@ const PoliceDashboard = () => {
               <span className="font-semibold text-gray-900">Police Panel</span>
             </div>
             <nav className="space-y-2">
-              {navLinks.map(link => (
-                <button
-                  key={link.name}
-                  onClick={() => {
-                    setActiveSection(link.section);
-                    setSidebarOpen(false);
-                  }}
-                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg font-medium
-                    ${activeSection === link.section
-                      ? "bg-blue-50 text-blue-600"
-                      : "text-gray-700 hover:bg-blue-50"}`}
-                >
-                  {link.icon}
-                  {link.name}
-                </button>
-              ))}
+              {navLinks.map(link =>
+                link.to ? (
+                  <Link
+                    key={link.name}
+                    to={link.to}
+                    className="w-full flex items-center gap-3 px-3 py-2 rounded-lg font-medium transition text-gray-700 hover:bg-blue-50"
+                    onClick={() => setSidebarOpen(false)}
+                  >
+                    {link.icon}
+                    {link.name}
+                  </Link>
+                ) : (
+                  <button
+                    key={link.name}
+                    onClick={() => {
+                      setActiveSection(link.section);
+                      setSidebarOpen(false);
+                    }}
+                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg font-medium transition
+                      ${activeSection === link.section
+                        ? "bg-blue-50 text-blue-600"
+                        : "text-gray-700 hover:bg-blue-50"}`}
+                  >
+                    {link.icon}
+                    {link.name}
+                  </button>
+                )
+              )}
             </nav>
           </div>
         </div>

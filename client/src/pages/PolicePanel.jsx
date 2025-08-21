@@ -11,22 +11,17 @@ const PolicePanel = () => {
   const [activeTab, setActiveTab] = useState('cases');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-
-  // --- CHANGE: Mock data ko hata kar real state variables banayein ---
   const [cases, setCases] = useState([]);
   const [stats, setStats] = useState({ activeCases: 0, resolvedToday: 0, highPriority: 0, responseTime: 'N/A' });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-
-  // Track expanded case
   const [expandedCaseId, setExpandedCaseId] = useState(null);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
         const token = localStorage.getItem('authToken');
-        
-        // Dono API calls ko ek saath karein
         const [casesRes, statsRes] = await Promise.all([
           fetch('http://localhost:8080/api/police/cases', {
             headers: { 'Authorization': `Bearer ${token}` }
@@ -35,24 +30,19 @@ const PolicePanel = () => {
             headers: { 'Authorization': `Bearer ${token}` }
           })
         ]);
-
         if (!casesRes.ok || !statsRes.ok) {
           throw new Error('Failed to load panel data.');
         }
-
         const casesData = await casesRes.json();
         const statsData = await statsRes.json();
-        
         setCases(casesData);
         setStats(statsData);
-
       } catch (err) {
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
-
     fetchData();
   }, []);
 
@@ -65,7 +55,6 @@ const PolicePanel = () => {
     }
   };
 
-  // Light theme color helpers
   const getStatusColor = (status) => {
     switch (status) {
       case 'resolved': return 'bg-green-100 text-green-800 border-green-300';
@@ -96,10 +85,10 @@ const PolicePanel = () => {
 
   const filteredCases = cases.filter(caseItem => {
     const reporterName = caseItem.reportedBy ? caseItem.reportedBy.name : 'Anonymous';
-    const matchesSearch = 
-        caseItem.incidentType.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        reporterName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        caseItem.locationAddress.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch =
+      caseItem.incidentType.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      reporterName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      caseItem.locationAddress.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || caseItem.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -114,7 +103,7 @@ const PolicePanel = () => {
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.5 }
+    transition: { duration: 0.5 },
   };
 
   const staggerContainer = {
@@ -124,10 +113,9 @@ const PolicePanel = () => {
       }
     }
   };
-  
-  // Simple StatCard component for demonstration
+
   const StatCard = ({ title, value, icon }) => {
-    const IconComp = icon; // ensure usage recognized
+    const IconComp = icon;
     return (
       <div className="bg-white border-2 border-blue-800 rounded-lg p-5 hover:bg-blue-50 transition-colors">
         {IconComp && <IconComp className="w-8 h-8 text-blue-700 mb-4" />}
@@ -144,7 +132,7 @@ const PolicePanel = () => {
     <div className="min-h-screen pt-8 pb-12 bg-gray-50 text-[#204080]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <motion.div 
+        <motion.div
           className="mb-8"
           initial="initial"
           animate="animate"
@@ -170,15 +158,13 @@ const PolicePanel = () => {
             </div>
           </div>
         </motion.div>
-
-        {/* --- CHANGE: Stats ko real data se display karein --- */}
+        {/* Stats */}
         <motion.div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8" initial="initial" animate="animate" variants={staggerContainer}>
           <motion.div variants={fadeInUp}><StatCard title="Active Cases" value={stats.activeCases} icon={FileText} /></motion.div>
           <motion.div variants={fadeInUp}><StatCard title="Resolved Today" value={stats.resolvedToday} icon={CheckCircle} /></motion.div>
           <motion.div variants={fadeInUp}><StatCard title="High Priority" value={stats.highPriority} icon={AlertTriangle} /></motion.div>
           <motion.div variants={fadeInUp}><StatCard title="Response Time" value={stats.responseTime} icon={Clock} /></motion.div>
         </motion.div>
-
         {/* Tab Navigation */}
         <motion.div
           className="bg-white rounded-lg border-2 border-blue-800 mb-8 overflow-hidden"
@@ -204,7 +190,6 @@ const PolicePanel = () => {
             })}
           </div>
         </motion.div>
-
         {/* Tab Content */}
         <motion.div
           initial="initial"
@@ -215,51 +200,49 @@ const PolicePanel = () => {
             <div className="space-y-6">
               {/* Search and Filters */}
               <div className="bg-white rounded-lg border-2 border-blue-800 p-6 shadow-sm">
-                  <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
-                    <div className="flex items-center space-x-4">
-                      <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" />
-                        <input
-                          type="text"
-                          value={searchTerm}
-                          onChange={(e) => setSearchTerm(e.target.value)}
-                          placeholder="Search cases..."
-                          className="pl-10 pr-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-700 focus:border-transparent"
-                        />
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-4">
-                      <Filter className="w-5 h-5 text-gray-500" />
-                      <select
-                        value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}
-                        className="bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-700 focus:border-transparent"
-                      >
-                        <option value="all">All Status</option>
-                        <option value="new">New</option>
-                        <option value="in_progress">In Progress</option>
-                        <option value="resolved">Resolved</option>
-                      </select>
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+                  <div className="flex items-center space-x-4">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" />
+                      <input
+                        type="text"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        placeholder="Search cases..."
+                        className="pl-10 pr-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-700 focus:border-transparent"
+                      />
                     </div>
                   </div>
+                  <div className="flex items-center space-x-4">
+                    <Filter className="w-5 h-5 text-gray-500" />
+                    <select
+                      value={statusFilter}
+                      onChange={(e) => setStatusFilter(e.target.value)}
+                      className="bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-700 focus:border-transparent"
+                    >
+                      <option value="all">All Status</option>
+                      <option value="new">New</option>
+                      <option value="in_progress">In Progress</option>
+                      <option value="resolved">Resolved</option>
+                    </select>
+                  </div>
+                </div>
               </div>
-
               {/* Cases Table */}
               <div className="bg-white rounded-lg border-2 border-blue-800 overflow-hidden shadow-sm">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-sm">
                     <thead className="bg-blue-50">
-                        <tr>
-                            <th className="px-6 py-4 text-xs font-semibold text-blue-800 uppercase tracking-wider">Case Details</th>
-                            <th className="px-6 py-4 text-xs font-semibold text-blue-800 uppercase tracking-wider">Reporter</th>
-                            <th className="px-6 py-4 text-xs font-semibold text-blue-800 uppercase tracking-wider">Location</th>
-                            <th className="px-6 py-4 text-xs font-semibold text-blue-800 uppercase tracking-wider">Priority</th>
-                            <th className="px-6 py-4 text-xs font-semibold text-blue-800 uppercase tracking-wider">Status</th>
-                            <th className="px-6 py-4 text-xs font-semibold text-blue-800 uppercase tracking-wider">Actions</th>
-                        </tr>
+                      <tr>
+                        <th className="px-6 py-4 text-xs font-semibold text-blue-800 uppercase tracking-wider">Case Details</th>
+                        <th className="px-6 py-4 text-xs font-semibold text-blue-800 uppercase tracking-wider">Reporter</th>
+                        <th className="px-6 py-4 text-xs font-semibold text-blue-800 uppercase tracking-wider">Location</th>
+                        <th className="px-6 py-4 text-xs font-semibold text-blue-800 uppercase tracking-wider">Priority</th>
+                        <th className="px-6 py-4 text-xs font-semibold text-blue-800 uppercase tracking-wider">Status</th>
+                        <th className="px-6 py-4 text-xs font-semibold text-blue-800 uppercase tracking-wider">Actions</th>
+                      </tr>
                     </thead>
                     <tbody>
-                      {/* --- CHANGE: Cases ko real data se display karein --- */}
                       {filteredCases.map((caseItem, index) => (
                         <React.Fragment key={caseItem._id}>
                           <tr
@@ -298,7 +281,6 @@ const PolicePanel = () => {
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="flex items-center space-x-2">
-                                {/* Eye icon removed as only trigger; Edit remains */}
                                 <button className="text-yellow-600 hover:text-yellow-700"><Edit className="w-4 h-4" /></button>
                               </div>
                             </td>
@@ -348,7 +330,6 @@ const PolicePanel = () => {
                                       <div className="text-gray-700 text-sm bg-white rounded-lg p-3 border border-blue-100 shadow-sm overflow-x-auto max-w-full" style={{ wordBreak: 'break-word' }}>
                                         {caseItem.description || 'No description provided.'}
                                       </div>
-                                      {/* Add more fields or actions here if needed */}
                                     </div>
                                   </motion.div>
                                 </div>
@@ -363,8 +344,6 @@ const PolicePanel = () => {
               </div>
             </div>
           )}
-          {/* ... baaki tabs ka content ... */}
-
           {activeTab === 'patrol' && (
             <div className="bg-white rounded-lg border-2 border-blue-800 p-8 text-center shadow-sm">
               <MapPin className="w-16 h-16 text-blue-700 mx-auto mb-4" />
@@ -372,7 +351,6 @@ const PolicePanel = () => {
               <p className="text-gray-600 text-sm">Interactive patrol route planning and tracking system</p>
             </div>
           )}
-
           {activeTab === 'reports' && (
             <div className="bg-white rounded-lg border-2 border-blue-800 p-8 text-center shadow-sm">
               <BarChart3 className="w-16 h-16 text-blue-700 mx-auto mb-4" />
@@ -380,7 +358,6 @@ const PolicePanel = () => {
               <p className="text-gray-600 text-sm">Crime statistics and patrol effectiveness reports</p>
             </div>
           )}
-
           {activeTab === 'dispatch' && (
             <div className="bg-white rounded-lg border-2 border-blue-800 p-8 text-center shadow-sm">
               <Radio className="w-16 h-16 text-blue-700 mx-auto mb-4" />

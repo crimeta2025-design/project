@@ -16,6 +16,7 @@ const ReportCrime = () => {
   const [formData, setFormData] = useState({
     incidentType: '',
     description: '',
+    otherDescription: '', // New field for "other" description
     locationAddress: '',
     incidentDate: '',
     incidentTime: '',
@@ -104,6 +105,16 @@ const ReportCrime = () => {
   };
 
   // Handler functions from the second file
+  const handleIncidentTypeChange = (e) => {
+    const val = e.target.value;
+    setFormData(prev => ({
+      ...prev,
+      incidentType: val,
+      // clear otherDescription when switching away from "other"
+      ...(val !== 'Other' ? { otherDescription: '' } : {})
+    }));
+  };
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({
@@ -185,7 +196,7 @@ const ReportCrime = () => {
                         name="incidentType"
                         value={type}
                         checked={active}
-                        onChange={handleChange}
+                        onChange={handleIncidentTypeChange}
                         className="sr-only"
                         required
                         aria-label={type}
@@ -210,8 +221,8 @@ const ReportCrime = () => {
                   <div className="relative">
                     <FileText className="absolute left-3 top-3 w-5 h-5 text-gray-800" />
                     <textarea
-                      name="description"
-                      value={formData.description}
+                      name="otherDescription"
+                      value={formData.otherDescription}
                       onChange={handleChange}
                       required
                       rows={4}
@@ -369,8 +380,8 @@ const ReportCrime = () => {
               )}
             </div>
             
+            {/* Anonymous Checkbox: UI styled for light theme */}
             {/*
-            Anonymous Checkbox: UI styled for light theme
             <div className="flex items-center space-x-3">
               <input 
                 type="checkbox" 

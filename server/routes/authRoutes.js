@@ -11,8 +11,8 @@ const crypto = require('crypto');
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: 'sj0855530@gmail.com', // Company Gmail
-        pass: 'tsod cgsl gqvq pjwm' // App Password
+        user: 'crimeta2025@gmail.com', // Company Gmail
+        pass: 'ehsq ruec trpy szpl' // App Password    
     }
 });
 
@@ -38,17 +38,56 @@ router.post('/register/user', async (req, res) => {
         const user = new User({
             name, email, password: hashedPassword, contact_number,
             role: 'citizen',
-            status: 'pending_verification', 
+            status: 'pending_verification',
             otp: hashedOtp,
-            otpExpiry: Date.now() + 10 * 60 * 1000 
+            otpExpiry: Date.now() + 10 * 60 * 1000
         });
         await user.save();
 
         await transporter.sendMail({
-            from: 'sj0855530@gmail.com', to: email,
-            subject: 'Verify Your Account | Crime Reporter',
-            html: `<h3>Your OTP is: ${otp}</h3>`
+            from: 'Crimeta', to: email,
+            subject: 'Verify Your Account | Crimeta',
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; background-color: #ffffff;">
+      
+                <!-- Logo -->
+                <div style="text-align: center; margin-bottom: 20px;">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Police_badge_icon.svg/1024px-Police_badge_icon.svg.png" alt="Crimeta Logo" width="70" style="margin-bottom: 10px;" />
+                <h2 style="color: #333; margin: 0;">Crimeta</h2>
+            </div>
+
+            <!-- Greeting -->
+                <p style="font-size: 16px; color: #333;">Hello <b>${name}</b>,</p>
+      
+            <!-- Message -->
+            <p style="font-size: 15px; color: #555; line-height: 1.6;">
+                Thank you for signing up with <b>Crimeta - Crime Reporter</b>.<br />
+                To complete your registration, please use the One-Time Password (OTP) below:
+            </p>
+
+            <!-- OTP Box -->
+            <div style="text-align: center; margin: 30px 0;">
+                <span style="display: inline-block; padding: 12px 25px; background-color: #87CEEB; color: #000; font-size: 20px; font-weight: bold; border-radius: 6px; letter-spacing: 2px;">
+                ${otp}
+                </span>
+            </div>
+
+            <!-- Extra Note -->
+            <p style="font-size: 14px; color: #777; line-height: 1.5;">
+                This OTP will expire in 10 minutes. Please do not share it with anyone for security reasons.
+            </p>
+
+            <!-- Footer -->
+                <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
+                <p style="font-size: 13px; color: #999; text-align: center;">
+                Regards,<br />
+                <b>Team Crimeta</b><br />
+                Crime Reporter Platform
+                </p>
+            </div>
+                    `
         });
+
 
         res.status(201).json({ msg: 'Registration successful! Please check your email for OTP.', email: email });
     } catch (error) {
@@ -60,12 +99,12 @@ router.post('/register/user', async (req, res) => {
 router.post('/register/department', async (req, res) => {
     try {
         // 1. Frontend se latitude aur longitude ko bhi nikalein
-        const { 
-            name, email, password, contact_number, 
+        const {
+            name, email, password, contact_number,
             address, city, pincode, badge_number,
-            latitude, longitude 
+            latitude, longitude
         } = req.body;
-        
+
         // Validation
         if (!latitude || !longitude) {
             return res.status(400).json({ msg: 'Location coordinates are required for police registration.' });
@@ -90,7 +129,7 @@ router.post('/register/department', async (req, res) => {
             city,
             pincode,
             badge_number,
-            
+
             // 2. Yahan par Mongoose ke liye zaroori 'location' object banayein
             location: {
                 type: 'Point',
@@ -102,10 +141,48 @@ router.post('/register/department', async (req, res) => {
         });
         await user.save();
 
-         await transporter.sendMail({
-            from: 'sj0855530@gmail.com', to: email,
-            subject: 'Verify Your Department Account | Crime Reporter',
-            html: `<h3>Your OTP is: ${otp}</h3>`
+        await transporter.sendMail({
+            from: 'Crimeta', to: email,
+            subject: 'Verify Your Account | Crimeta',
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; background-color: #ffffff;">
+      
+                <!-- Logo -->
+                <div style="text-align: center; margin-bottom: 20px;">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Police_badge_icon.svg/1024px-Police_badge_icon.svg.png" alt="Crimeta Logo" width="70" style="margin-bottom: 10px;" />
+                <h2 style="color: #333; margin: 0;">Crimeta</h2>
+            </div>
+
+            <!-- Greeting -->
+                <p style="font-size: 16px; color: #333;">Hello <b>${name}</b>,</p>
+      
+            <!-- Message -->
+            <p style="font-size: 15px; color: #555; line-height: 1.6;">
+                Thank you for signing up with <b>Crimeta</b>.<br />
+                To complete your registration, please use the One-Time Password (OTP) below:
+            </p>
+
+            <!-- OTP Box -->
+            <div style="text-align: center; margin: 30px 0;">
+                <span style="display: inline-block; padding: 12px 25px; background-color: #87CEEB; color: #000; font-size: 20px; font-weight: bold; border-radius: 6px; letter-spacing: 2px;">
+                ${otp}
+                </span>
+            </div>
+
+            <!-- Extra Note -->
+            <p style="font-size: 14px; color: #777; line-height: 1.5;">
+                This OTP will expire in 10 minutes. Please do not share it with anyone for security reasons.
+            </p>
+
+            <!-- Footer -->
+                <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
+                <p style="font-size: 13px; color: #999; text-align: center;">
+                Regards,<br />
+                <b>Team Crimeta</b><br />
+                Crime Reporter Platform
+                </p>
+            </div>
+                    `
         });
 
         res.status(201).json({ msg: 'Registration request sent! Please check your email for OTP.', email: user.email });
@@ -132,13 +209,13 @@ router.post('/verify-otp', async (req, res) => {
             return res.status(400).json({ msg: 'Invalid OTP.' });
         }
 
-        
+
         if (user.role === 'citizen') {
             user.status = 'approved';
         } else if (user.role === 'police') {
             user.status = 'pending_approval';
         }
-        
+
         user.otp = undefined;
         user.otpExpiry = undefined;
         await user.save();
@@ -160,16 +237,16 @@ router.post('/login', async (req, res) => {
         if (!user || !await bcrypt.compare(password, user.password)) {
             return res.status(400).json({ msg: 'Invalid Credentials' });
         }
-        
+
         if (user.status !== 'approved') {
             return res.status(403).json({ msg: `Your account is not approved. Current status: ${user.status}` });
         }
 
-        
+
 
         const payload = { user: { id: user.id, role: user.role, name: user.name, } };
         const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '5h' });
-        res.status(200).json({message: "Login Successful", token });
+        res.status(200).json({ message: "Login Successful", token });
 
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -195,22 +272,54 @@ router.post('/forgot-password', async (req, res) => {
         const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
 
         user.passwordResetToken = hashedToken;
-        user.passwordResetExpires = Date.now() + 15 * 60 * 1000; 
+        user.passwordResetExpires = Date.now() + 15 * 60 * 1000;
         await user.save();
 
-        
+
         const resetUrl = `http://localhost:5173/reset-password/${resetToken}`;
 
         await transporter.sendMail({
-            from: 'sj0855530@gmail.com',
-            to: user.email,
-            subject: 'Password Reset Request',
+            from: 'Crimeta', to: email,
+            subject: 'Password Reset Request | Crimeta',
             html: `
-                <p>Aapne password reset ke liye request kiya hai.</p>
-                <p>Is link par click karke apna password reset karein:</p>
-                <a href="${resetUrl}" target="_blank">Reset Password</a>
-                <p>Yeh link 15 minute ke liye valid hai.</p>
-            `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; background-color: #ffffff;">
+      
+                <!-- Logo -->
+                <div style="text-align: center; margin-bottom: 20px;">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Police_badge_icon.svg/1024px-Police_badge_icon.svg.png" alt="Crimeta Logo" width="70" style="margin-bottom: 10px;" />
+                <h2 style="color: #333; margin: 0;">Crimeta</h2>
+            </div>
+
+            <!-- Greeting -->
+                <p style="font-size: 16px; color: #333;">Hello <b>${name}</b>,</p>
+      
+            <!-- Message -->
+            <p style="font-size: 15px; color: #555; line-height: 1.6;">
+                 <b>Crimeta - Crime Reporter</b>.<br />
+                To forget your otp, please use the One-Time Password (OTP) below:
+            </p>
+
+            <!-- OTP Box -->
+            <div style="text-align: center; margin: 30px 0;">
+                <span style="display: inline-block; padding: 12px 25px; background-color: #87CEEB; color: #000; font-size: 20px; font-weight: bold; border-radius: 6px; letter-spacing: 2px;">
+                ${otp}
+                </span>
+            </div>
+
+            <!-- Extra Note -->
+            <p style="font-size: 14px; color: #777; line-height: 1.5;">
+                This OTP will expire in 10 minutes. Please do not share it with anyone for security reasons.
+            </p>
+
+            <!-- Footer -->
+                <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
+                <p style="font-size: 13px; color: #999; text-align: center;">
+                Regards,<br />
+                <b>Team Crimeta</b><br />
+                Crime Reporter Platform
+                </p>
+            </div>
+                    `
         });
 
         res.status(200).json({ msg: 'Agar aapka email registered hai, to aapko ek reset link milega.' });
@@ -230,7 +339,7 @@ router.post('/reset-password/:token', async (req, res) => {
 
         const user = await User.findOne({
             passwordResetToken: hashedToken,
-            passwordResetExpires: { $gt: Date.now() } 
+            passwordResetExpires: { $gt: Date.now() }
         });
 
         if (!user) {
@@ -247,7 +356,7 @@ router.post('/reset-password/:token', async (req, res) => {
         const payload = { user: { id: user.id, role: user.role } };
         const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '5h' });
 
-        res.status(200).json({ 
+        res.status(200).json({
             msg: 'Password has been reset successfully!',
             token: token
         });

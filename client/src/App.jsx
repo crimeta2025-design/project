@@ -18,39 +18,30 @@ import PoliceDashboard from './pages/PoliceDashboard';
 
 const ProtectedRoute = ({ children, adminOnly = false }) => {
   const { user, loading } = useAuth();
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-  if (adminOnly && user.role !== 'admin') {
-    return <Navigate to="/dashboard" replace />;
-  }
+  if (loading) return <div>Loading...</div>;
+  if (!user) return <Navigate to="/login" replace />;
+  if (adminOnly && user.role !== 'admin') return <Navigate to="/dashboard" replace />;
   return children;
 };
 
 const PoliceRoute = ({ children }) => {
   const { user, loading } = useAuth();
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-  if (!['admin', 'police'].includes(user.role)) {
-    return <Navigate to="/dashboard" replace />;
-  }
+  if (loading) return <div>Loading...</div>;
+  if (!user) return <Navigate to="/login" replace />;
+  if (!['admin', 'police'].includes(user.role)) return <Navigate to="/dashboard" replace />;
   return children;
 };
 
 const PublicRoute = ({ children }) => {
   const { user, loading } = useAuth();
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+  if (loading) return <div>Loading...</div>;
   if (user) {
-    const target = user.role === 'citizen' ? '/my-reports' : '/dashboard';
+    // send user to appropriate default page after login
+    const target =
+      user.role === 'citizen' ? '/my-reports' :
+      user.role === 'police' ? '/policedashboard' :
+      user.role === 'admin' ? '/admin' :
+      '/dashboard';
     return <Navigate to={target} replace />;
   }
   return children;
@@ -65,9 +56,7 @@ function AppContent() {
   const path = (location.pathname || '').toLowerCase();
   const isPoliceDashboardPath =
     path === '/policedashboard' ||
-    path.startsWith('/policedashboard/') ||
-    path === '/mapview' ||
-    path.startsWith('/mapview/');
+    path.startsWith('/policedashboard/');
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -81,20 +70,38 @@ function AppContent() {
           <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
           <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
           <Route path="/reset-password/:token" element={<PublicRoute><ResetPassword /></PublicRoute>} />
+
           {/* Protected Routes for all logged-in users */}
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
           <Route path="/report" element={<ProtectedRoute><ReportCrime /></ProtectedRoute>} />
           <Route path="/map" element={<ProtectedRoute><MapView /></ProtectedRoute>} />
           <Route path="/my-reports" element={<ProtectedRoute><MyReports /></ProtectedRoute>} />
-          {/* Role-specific Routes */}
-          <Route path="/police" element={<PoliceRoute><PolicePanel /></PoliceRoute>} />
+
+          {/* Police-specific routes */}
+          {/* /police redirects to police dashboard after login */}
+          <Route path="/police" element={<PoliceRoute><Navigate to="/policedashboard" replace /></PoliceRoute>} />
+          <Route path="/policedashboard" element={<PoliceRoute><PoliceDashboard /></PoliceRoute>} />
+          <Route path="/mapview" element={<PoliceRoute><MapView /></PoliceRoute>} />
+          <Route path="/policepanel" element={<PoliceRoute><PolicePanel /></PoliceRoute>} />
+
+          {/* Admin */}
           <Route path="/admin" element={<ProtectedRoute adminOnly={true}><AdminPanel /></ProtectedRoute>} />
-          {/* Add PoliceDashboard, MapView, PolicePanel routes for sidebar navigation */}
-          <Route path="/policedashboard" element={<PoliceDashboard />} />
-          <Route path="/mapview" element={<MapView />} />
-          <Route path="/policepanel" element={<PolicePanel />} />
-          {/* Catch-all */}
-          <Route path="*" element={<Navigate to={user ? (user.role === 'citizen' ? '/my-reports' : '/dashboard') : '/'} replace />} />
+
+          {/* Catch-all: send user to role-appropriate default */}
+          <Route
+            path="*"
+            element={
+              <Navigate to={
+                user
+                  ? (user.role === 'citizen' ? '/my-reports'
+                      : user.role === 'police' ? '/policedashboard'
+                      : user.role === 'admin' ? '/admin'
+                      : '/dashboard')
+                  : '/'
+              } replace
+              />
+            }
+          />
         </Routes>
       </main>
       {user && <Chatbot />}

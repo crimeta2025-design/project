@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
@@ -58,9 +58,21 @@ const PublicRoute = ({ children }) => {
 
 function AppContent() {
   const { user } = useAuth();
+  const location = useLocation();
+
+  // Only hide top Navbar on PoliceDashboard and its mapview routes.
+  // Keep Navbar visible on PolicePanel (/policepanel).
+  const path = (location.pathname || '').toLowerCase();
+  const isPoliceDashboardPath =
+    path === '/policedashboard' ||
+    path.startsWith('/policedashboard/') ||
+    path === '/mapview' ||
+    path.startsWith('/mapview/');
+
   return (
     <div className="min-h-screen bg-gray-100">
-      {user && <Navbar />}
+      {/* show Navbar only when user is logged in AND not on PoliceDashboard/mapview */}
+      {user && !isPoliceDashboardPath && <Navbar />}
       <main className="p-4">
         <Routes>
           {/* Public Routes */}

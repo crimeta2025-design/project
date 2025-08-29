@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Search,
@@ -20,7 +20,7 @@ const navLinks = [
   { name: "Dashboard", icon: <Home />, to: "/policedashboard" },
   { name: "Cases", icon: <FileText />, to: "/policedashboard/cases" },
   { name: "Reports", icon: <BarChart />, to: "/policedashboard/reports" },
-  { name: "Map View", icon: <Map />, to: "/mapview" },
+  { name: "Map View", icon: <Map />, to: "/map" },
 ];
 
 const bottomLinks = [

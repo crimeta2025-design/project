@@ -31,15 +31,16 @@ const Navbar = () => {
   // Build nav items with citizen users seeing 'My Reports' instead of 'Dashboard'
   const navItems = [
     ...(user?.role === 'citizen'
-      ? [{ path: '/my-reports', icon: BarChart3, label: 'My Reports' }]
-      : [{ path: '/dashboard', icon: Home, label: 'Dashboard' }]
+      ? [{ path: '/dashboard', icon: BarChart3, label: 'Dashboard' }]
+      : [{ path: '/policedashboard', icon: Home, label: 'Dashboard' }]
     ),
+    ...(user?.role === 'citizen' ? [{ path: '/my-reports', icon: BarChart3, label: 'My Reports' }] : []),
     { path: '/map', icon: MapPin, label: 'Map View' },
     ...(user?.role === 'citizen' ? [
       { path: '/report', icon: FileText, label: 'Report Crime' }
     ] : []),
     ...(user?.role === 'police' ? [
-      { path: '/police', icon: AlertTriangle, label: 'Police Panel' }
+      { path: '/policepanel', icon: AlertTriangle, label: 'Police Panel' }
     ] : []),
     ...(user?.role === 'admin' ? [
       { path: '/admin', icon: Settings, label: 'Admin Panel' }
@@ -52,7 +53,7 @@ const Navbar = () => {
     <nav className="bg-white border-b-4 border-white">
         <div className="max-w-7xl mx-auto flex justify-between items-center px-4 sm:px-8 py-3">
           {/* Logo & Title */}
-          <Link to={user?.role === 'citizen' ? '/my-reports' : '/dashboard'} className="flex items-center gap-3">
+          <Link to={user?.role === 'citizen' ? '/my-reports' : '/dashboard'} className="flex items-center gap-5">
             <Shield className="text-blue-600 w-10 h-10" />
             <div>
               <span className="block text-xl font-extrabold text-blue-700 leading-5 tracking-wide">Crimeta</span>

@@ -68,13 +68,7 @@ const FAKE_DEPARTMENT_STATS = [
   { dept: 'Cyber Cell', members: 23, openCases: 1, resolved: 41, satisfaction: 92 }
 ];
 
-const REPORT_TYPES = [
-  { type: 'Theft', count: 62, icon: Briefcase, color: 'text-orange-500' },
-  { type: 'Vandalism', count: 29, icon: AlertTriangle, color: 'text-yellow-700' },
-  { type: 'Assault', count: 17, icon: User, color: 'text-red-600' },
-  { type: 'Drug Activity', count: 12, icon: FileText, color: 'text-teal-700' },
-  { type: 'Other', count: 36, icon: Star, color: 'text-gray-500' }
-];
+
 
 // More mock users for activity
 const usersMock = [
@@ -200,6 +194,104 @@ const ReportsByType = ({ data }) => (
 
 ReportsByType.propTypes = { data: PropTypes.array };
 
+// ====== Citizen-only Summary Panel (small charts, quick actions, map) ======
+const CitizenPanel = ({ recentReports = [], activity = [], user }) => {
+  // Local simple container (no external animation dependency)
+  return (
+    <div className="w-full space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Reports by Status (pie) */}
+        <div className="bg-white rounded-lg border-2 border-blue-800 shadow p-4">
+          <h3 className="text-sm font-semibold text-[#204080] mb-4">Reports by Status</h3>
+          <div className="flex items-center gap-6">
+            <div
+              className="w-28 h-28 rounded-full shadow flex-none"
+              style={{
+                background:
+                  'conic-gradient(#10b981 0 40%, #3b82f6 40% 75%, #9ca3af 75% 100%)'
+              }}
+              aria-hidden
+            />
+            <div className="flex-1">
+              <ul className="space-y-2 text-sm text-[#204080]">
+                <li className="flex items-center gap-3"><span className="w-3 h-3 rounded-full bg-[#10b981]" />Resolved</li>
+                <li className="flex items-center gap-3"><span className="w-3 h-3 rounded-full bg-[#3b82f6]" />Active</li>
+                <li className="flex items-center gap-3"><span className="w-3 h-3 rounded-full bg-[#9ca3af]" />New</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        {/* Reports Trend (mini line) */}
+        <div className="bg-white rounded-lg border-2 border-blue-800 shadow p-4">
+          <h3 className="text-sm font-semibold text-[#204080] mb-4">Reports Trend</h3>
+          <svg viewBox="0 0 120 48" className="w-full h-24">
+            <polyline
+              fill="none"
+              stroke="#3b82f6"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              points="0,36 18,26 36,30 54,16 72,22 90,10 108,18 120,14"
+            />
+            <g fill="#fff" stroke="none">
+              <circle cx="18" cy="26" r="1.6" fill="#3b82f6" />
+              <circle cx="54" cy="16" r="1.6" fill="#3b82f6" />
+              <circle cx="90" cy="10" r="1.6" fill="#3b82f6" />
+            </g>
+          </svg>
+          <div className="text-xs text-gray-500 mt-2">Jan — May</div>
+        </div>
+
+         
+
+ <div className={`bg-white rounded-lg border-2 border-yellow-700 shadow p-5 sm:p-6`}>
+              <h2 className="text-xl font-bold text-[#204080] mb-4">Quick Actions</h2>
+              <div className="space-y-3">
+                {user?.role === 'citizen' && (
+                  <>
+                    <button className="w-full bg-green-600 hover:bg-green-700 text-white p-3 rounded-lg font-semibold transition-colors flex items-center justify-center space-x-2">
+                      <AlertTriangle className="w-4 h-4" />
+                      <span>Report Incident</span>
+                    </button>
+                    <button className="w-full bg-[#204080]/10 hover:bg-[#204080]/20 text-[#204080] p-3 rounded-lg font-semibold transition-colors flex items-center justify-center space-x-2">
+                      <BarChart3 className="w-4 h-4" />
+                      <span>View My Reports</span>
+                    </button>
+                  </>
+                )}
+                <button className="w-full bg-[#204080]/10 hover:bg-[#204080]/20 text-[#204080] p-3 rounded-lg font-semibold transition-colors flex items-center justify-center space-x-2">
+                  <MapPin className="w-4 h-4" />
+                  <span>View Safety Map</span>
+                </button>
+              </div>
+            </div>
+         
+      </div>
+
+     
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+     
+
+       
+      </div>
+    
+  );
+};
+
 // ====== Main Dashboard Component ======
 const Dashboard = () => {
   const { user } = useAuth();
@@ -271,20 +363,17 @@ const Dashboard = () => {
 
   // ================ RENDER ================
   return (
-  <div className="min-h-screen bg-gray-50 text-black">
-      {/* SCHEME STRIPE FOR GOVERNMENT LOOK */}
-
-
+    <div className="min-h-screen bg-gray-50 text-black">
       {/* Main content */}
-  <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header User Card */}
         <motion.div className="mb-8" initial="initial" animate="animate" variants={fadeInUp}>
-      <div className={`rounded-lg p-5 sm:p-6 border-2 shadow flex flex-col sm:flex-row sm:items-center gap-6 ${getRoleClass(user?.role, true)}`}>
+          <div className={`rounded-lg p-5 sm:p-6 border-2 shadow flex flex-col sm:flex-row sm:items-center gap-6 ${getRoleClass(user?.role, true)}`}>
             <div className={`p-4 rounded-full ${getRoleClass(user?.role)}`}>
               <Shield className={`w-10 h-10 ${user?.role === 'police' ? 'text-[#204080]' : 'text-white'}`} />
             </div>
             <div>
-        <h1 className="text-2xl sm:text-3xl font-bold mb-1 leading-tight">{`Welcome,  ${user?.name || 'Guest'}`}</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold mb-1 leading-tight">{`Welcome,  ${user?.name || 'Guest'}`}</h1>
               <p className={`font-medium ${user?.role === 'citizen' ? 'text-green-700'
                 : user?.role === 'police' ? 'text-yellow-700'
                   : 'text-red-700'
@@ -313,17 +402,21 @@ const Dashboard = () => {
         </motion.div>
 
         {/* "Reports by Type" and "Department Overview" row */}
-  <div className="grid gap-6 lg:gap-8 grid-cols-1 lg:grid-cols-2 mb-8">
-          <div className="w-full overflow-x-auto">
-            <ReportsByType data={REPORT_TYPES} />
-          </div>
-          <div className="w-full overflow-x-auto">
-            <DepartmentOverview stats={FAKE_DEPARTMENT_STATS} />
-          </div>
+        <div className="grid gap-6 lg:gap-8 grid-cols-1 lg:grid-cols-2 mb-8">
+          
+         
         </div>
 
+        {/* Insert citizen panel: */}
+        {user?.role === 'citizen' && (
+          <motion.div initial="initial" animate="animate" variants={staggerContainer} className="mb-8">
+            <CitizenPanel recentReports={recentReports} activity={activity} user={user} />
+          </motion.div>
+        )}
+
+       
         {/* Main content row (Reports, Quick Actions, Activity) */}
-  <div className="grid gap-6 lg:gap-8 lg:grid-cols-3">
+        <div className="grid gap-6 lg:gap-8 lg:grid-cols-3">
           {/* Recent Reports */}
           <motion.div className="lg:col-span-2" initial="initial" animate="animate" variants={fadeInUp}>
             <div className="bg-white rounded-lg border-2 border-blue-800 shadow p-5 sm:p-6">
@@ -364,29 +457,22 @@ const Dashboard = () => {
           {/* Quick Actions & Activity Feed */}
           <motion.div className="space-y-6" initial="initial" animate="animate" variants={fadeInUp}>
 
-            {/* Quick Actions */}
-            <div className={`bg-white rounded-lg border-2 border-yellow-700 shadow p-5 sm:p-6`}>
-              <h2 className="text-xl font-bold text-[#204080] mb-4">Quick Actions</h2>
-              <div className="space-y-3">
-                {user?.role === 'citizen' && (
-                  <>
-                    <button className="w-full bg-green-600 hover:bg-green-700 text-white p-3 rounded-lg font-semibold transition-colors flex items-center justify-center space-x-2">
-                      <AlertTriangle className="w-4 h-4" />
-                      <span>Report Incident</span>
-                    </button>
-                    <button className="w-full bg-[#204080]/10 hover:bg-[#204080]/20 text-[#204080] p-3 rounded-lg font-semibold transition-colors flex items-center justify-center space-x-2">
-                      <BarChart3 className="w-4 h-4" />
-                      <span>View My Reports</span>
-                    </button>
-                  </>
-                )}
-                <button className="w-full bg-[#204080]/10 hover:bg-[#204080]/20 text-[#204080] p-3 rounded-lg font-semibold transition-colors flex items-center justify-center space-x-2">
-                  <MapPin className="w-4 h-4" />
-                  <span>View Safety Map</span>
-                </button>
-              </div>
-            </div>
-
+            <div className="bg-white rounded-lg border-2 border-blue-800 shadow p-4">
+          <h3 className="text-sm font-semibold text-[#204080] mb-3">Incident Map</h3>
+          <div className="w-full h-40 rounded-md bg-gray-100 overflow-hidden">
+            {/* simple map placeholder - replace with real map component later */}
+            <svg viewBox="0 0 100 100" className="w-full h-full">
+              <rect x="0" y="0" width="100" height="100" fill="#f3f4f6" />
+              <circle cx="60" cy="34" r="8" fill="#34d399" opacity="0.9" />
+              <g fill="#cbd5e1" opacity="0.6">
+                <rect x="5" y="10" width="90" height="6" rx="2" />
+                <rect x="5" y="28" width="90" height="6" rx="2" />
+                <rect x="5" y="46" width="90" height="6" rx="2" />
+              </g>
+            </svg>
+          </div>
+        </div>
+           
             {/* Recent Activity */}
             <div className="bg-white rounded-lg border-2 border-blue-800 shadow p-5 sm:p-6">
               <h2 className="text-lg sm:text-xl font-bold text-[#204080] mb-4">Recent Activity</h2>

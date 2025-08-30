@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import PropTypes from 'prop-types';
 import {
@@ -22,6 +22,8 @@ import {
   BadgePercent
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
 
 // ====== Tricolor Header Bar ======
 const TricolorBar = ({ show }) =>
@@ -292,6 +294,17 @@ const CitizenPanel = ({ recentReports = [], activity = [], user }) => {
   );
 };
 
+// Helper to fit map to all markers
+const FitBounds = ({ positions }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (positions.length > 0) {
+      map.fitBounds(positions, { padding: [30, 30] });
+    }
+  }, [positions, map]);
+  return null;
+}; 
+
 // ====== Main Dashboard Component ======
 const Dashboard = () => {
   const { user } = useAuth();
@@ -334,12 +347,12 @@ const Dashboard = () => {
 
   // ----- Reports Data -----
   const recentReports = useMemo(() => [
-    { id: 1, type: 'Theft', location: 'Downtown Mall', time: '2 hours ago', status: 'investigating', severity: 'medium' },
-    { id: 2, type: 'Vandalism', location: 'Central Park', time: '4 hours ago', status: 'resolved', severity: 'low' },
-    { id: 3, type: 'Assault', location: 'Main Street', time: '6 hours ago', status: 'pending', severity: 'high' },
-    { id: 4, type: 'Drug Activity', location: 'School District', time: '8 hours ago', status: 'investigating', severity: 'high' },
-    { id: 5, type: 'Theft', location: 'Station Road', time: '1 day ago', status: 'resolved', severity: 'medium' },
-    { id: 6, type: 'Other', location: 'Sector 9', time: '2 days ago', status: 'pending', severity: 'low' }
+    { id: 1, type: 'Theft', location: 'Downtown Mall', time: '2 hours ago', status: 'investigating', severity: 'medium', lat: 19.0760, lng: 72.8777 },
+    { id: 2, type: 'Vandalism', location: 'Central Park', time: '4 hours ago', status: 'resolved', severity: 'low', lat: 19.0800, lng: 72.8800 },
+    { id: 3, type: 'Assault', location: 'Main Street', time: '6 hours ago', status: 'pending', severity: 'high', lat: 19.0700, lng: 72.8700 },
+    { id: 4, type: 'Drug Activity', location: 'School District', time: '8 hours ago', status: 'investigating', severity: 'high', lat: 19.0780, lng: 72.8750 },
+    { id: 5, type: 'Theft', location: 'Station Road', time: '1 day ago', status: 'resolved', severity: 'medium', lat: 19.0740, lng: 72.8790 },
+    { id: 6, type: 'Other', location: 'Sector 9', time: '2 days ago', status: 'pending', severity: 'low', lat: 19.0720, lng: 72.8760 }
   ], []);
 
   // ----- Activity Feed -----
@@ -456,22 +469,34 @@ const Dashboard = () => {
 
           {/* Quick Actions & Activity Feed */}
           <motion.div className="space-y-6" initial="initial" animate="animate" variants={fadeInUp}>
-
             <div className="bg-white rounded-lg border-2 border-blue-800 shadow p-4">
-          <h3 className="text-sm font-semibold text-[#204080] mb-3">Incident Map</h3>
-          <div className="w-full h-40 rounded-md bg-gray-100 overflow-hidden">
-            {/* simple map placeholder - replace with real map component later */}
-            <svg viewBox="0 0 100 100" className="w-full h-full">
-              <rect x="0" y="0" width="100" height="100" fill="#f3f4f6" />
-              <circle cx="60" cy="34" r="8" fill="#34d399" opacity="0.9" />
-              <g fill="#cbd5e1" opacity="0.6">
-                <rect x="5" y="10" width="90" height="6" rx="2" />
-                <rect x="5" y="28" width="90" height="6" rx="2" />
-                <rect x="5" y="46" width="90" height="6" rx="2" />
-              </g>
-            </svg>
-          </div>
-        </div>
+              <h3 className="text-sm font-semibold text-[#204080] mb-3">Incident Map</h3>
+              <div className="w-full h-40 rounded-md bg-gray-100 overflow-hidden">
+                <MapContainer
+                  center={[19.0760, 72.8777]}
+                  zoom={12}
+                  scrollWheelZoom={false}
+                  style={{ height: "100%", width: "100%" }}
+                >
+                  <TileLayer
+                    attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  />
+                  {/* Auto-fit all markers */}
+                  <FitBounds positions={recentReports.map(r => [r.lat, r.lng])} />
+                  {recentReports.map((report) => (
+                    <Marker key={report.id} position={[report.lat, report.lng]}>
+                      <Popup>
+                        <strong>{report.type}</strong><br />
+                        {report.location}<br />
+                        {report.time}<br />
+                        Status: {report.status}
+                      </Popup>
+                    </Marker>
+                  ))}
+                </MapContainer>
+              </div>
+            </div>
            
             {/* Recent Activity */}
             <div className="bg-white rounded-lg border-2 border-blue-800 shadow p-5 sm:p-6">

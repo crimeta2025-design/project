@@ -38,7 +38,7 @@ const PublicRoute = ({ children }) => {
   if (user) {
     // send user to appropriate default page after login
     const target =
-      user.role === 'citizen' ? '/my-reports' :
+      user.role === 'citizen' ? '/dashboard' :
       user.role === 'police' ? '/policedashboard' :
       user.role === 'admin' ? '/admin' :
       '/dashboard';
@@ -93,7 +93,7 @@ function AppContent() {
             element={
               <Navigate to={
                 user
-                  ? (user.role === 'citizen' ? '/my-reports'
+                  ? (user.role === 'citizen' ? '/dashboard'
                       : user.role === 'police' ? '/policedashboard'
                       : user.role === 'admin' ? '/admin'
                       : '/dashboard')

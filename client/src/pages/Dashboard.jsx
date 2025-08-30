@@ -27,6 +27,7 @@ import 'leaflet/dist/leaflet.css';
 import { Pie, Line } from 'react-chartjs-2';
 import { Chart, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement } from 'chart.js';
 Chart.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement);
+import { useNavigate } from 'react-router-dom';
 
 // ====== Tricolor Header Bar ======
 const TricolorBar = ({ show }) =>
@@ -201,7 +202,7 @@ ReportsByType.propTypes = { data: PropTypes.array };
 
 // ====== Citizen-only Summary Panel (small charts, quick actions, map) ======
 const CitizenPanel = ({ recentReports = [], activity = [], user }) => {
-  // Local simple container (no external animation dependency)
+  const navigate = useNavigate();
 
   const statusData = [
     { label: 'Resolved', value: 90, color: '#10b981' },
@@ -345,34 +346,41 @@ const CitizenPanel = ({ recentReports = [], activity = [], user }) => {
           </div>
         </div>
 
-         
-
- <div className={`bg-white rounded-lg border-2 border-yellow-700 shadow p-5 sm:p-6`}>
-              <h2 className="text-xl font-bold text-[#204080] mb-4">Quick Actions</h2>
-              <div className="space-y-3">
-                {user?.role === 'citizen' && (
-                  <>
-                    <button className="w-full bg-green-600 hover:bg-green-700 text-white p-3 rounded-lg font-semibold transition-colors flex items-center justify-center space-x-2">
-                      <AlertTriangle className="w-4 h-4" />
-                      <span>Report Incident</span>
-                    </button>
-                    <button className="w-full bg-[#204080]/10 hover:bg-[#204080]/20 text-[#204080] p-3 rounded-lg font-semibold transition-colors flex items-center justify-center space-x-2">
-                      <BarChart3 className="w-4 h-4" />
-                      <span>View My Reports</span>
-                    </button>
-                  </>
-                )}
-                <button className="w-full bg-[#204080]/10 hover:bg-[#204080]/20 text-[#204080] p-3 rounded-lg font-semibold transition-colors flex items-center justify-center space-x-2">
-                  <MapPin className="w-4 h-4" />
-                  <span>View Safety Map</span>
+        {/* Quick Actions */}
+        <div className={`bg-white rounded-lg border-2 border-yellow-700 shadow p-5 sm:p-6`}>
+          <h2 className="text-xl font-bold text-[#204080] mb-4">Quick Actions</h2>
+          <div className="space-y-3">
+            {user?.role === 'citizen' && (
+              <>
+                <button
+                  className="w-full bg-green-600 hover:bg-green-700 text-white p-3 rounded-lg font-semibold transition-colors flex items-center justify-center space-x-2"
+                  onClick={() => navigate('/report')}
+                >
+                  <AlertTriangle className="w-4 h-4" />
+                  <span>Report Incident</span>
                 </button>
-              </div>
-            </div>
-         
+                <button
+                  className="w-full bg-[#204080]/10 hover:bg-[#204080]/20 text-[#204080] p-3 rounded-lg font-semibold transition-colors flex items-center justify-center space-x-2"
+                  onClick={() => navigate('/my-reports')}
+                >
+                  <BarChart3 className="w-4 h-4" />
+                  <span>View My Reports</span>
+                </button>
+              </>
+            )}
+            <button
+              className="w-full bg-[#204080]/10 hover:bg-[#204080]/20 text-[#204080] p-3 rounded-lg font-semibold transition-colors flex items-center justify-center space-x-2"
+              onClick={() => navigate('/map')}
+            >
+              <MapPin className="w-4 h-4" />
+              <span>View Safety Map</span>
+            </button>
+          </div>
+        </div>
       </div>
 
-      </div>
-    
+      {/* ...rest of CitizenPanel... */}
+    </div>
   );
 };
 

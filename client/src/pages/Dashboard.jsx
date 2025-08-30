@@ -205,9 +205,9 @@ const CitizenPanel = ({ recentReports = [], activity = [], user }) => {
   const navigate = useNavigate();
 
   const statusData = [
-    { label: 'Resolved', value: 90, color: '#f59e42' },   // orange
-    { label: 'Active', value: 45, color: '#14b8a6' },     // teal
-    { label: 'New', value: 21, color: '#a78bfa' }         // purple
+    { label: 'Resolved', value: 90, color: '#10b981' },
+    { label: 'Active', value: 45, color: '#3b82f6' },
+    { label: 'New', value: 21, color: '#9ca3af' }
   ];
 
   const statusPieData = {

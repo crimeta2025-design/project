@@ -205,9 +205,9 @@ const CitizenPanel = ({ recentReports = [], activity = [], user }) => {
   const navigate = useNavigate();
 
   const statusData = [
-    { label: 'Resolved', value: 90, color: '#10b981' },
-    { label: 'Active', value: 45, color: '#3b82f6' },
-    { label: 'New', value: 21, color: '#9ca3af' }
+    { label: 'Resolved', value: 90, color: '#f59e42' },   // orange
+    { label: 'Active', value: 45, color: '#14b8a6' },     // teal
+    { label: 'New', value: 21, color: '#a78bfa' }         // purple
   ];
 
   const statusPieData = {
@@ -249,8 +249,8 @@ const CitizenPanel = ({ recentReports = [], activity = [], user }) => {
         label: 'Reports',
         data: [22, 38, 45, 62, 54],
         fill: false,
-        borderColor: '#3b82f6',
-        backgroundColor: '#3b82f6',
+        borderColor: '#7c3aed',        // <-- purple line
+        backgroundColor: '#c4b5fd',    // <-- light purple points
         tension: 0.4,
         pointRadius: 5,
         pointHoverRadius: 8,

@@ -24,6 +24,9 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
+import { Pie, Line } from 'react-chartjs-2';
+import { Chart, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement } from 'chart.js';
+Chart.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement);
 
 // ====== Tricolor Header Bar ======
 const TricolorBar = ({ show }) =>
@@ -199,27 +202,104 @@ ReportsByType.propTypes = { data: PropTypes.array };
 // ====== Citizen-only Summary Panel (small charts, quick actions, map) ======
 const CitizenPanel = ({ recentReports = [], activity = [], user }) => {
   // Local simple container (no external animation dependency)
+
+  const statusData = [
+    { label: 'Resolved', value: 90, color: '#10b981' },
+    { label: 'Active', value: 45, color: '#3b82f6' },
+    { label: 'New', value: 21, color: '#9ca3af' }
+  ];
+
+  const statusPieData = {
+    labels: statusData.map(s => s.label),
+    datasets: [
+      {
+        data: statusData.map(s => s.value),
+        backgroundColor: statusData.map(s => s.color),
+        borderWidth: 2,
+        borderColor: '#fff',
+        hoverOffset: 8,
+      }
+    ]
+  };
+
+  const statusPieOptions = {
+    responsive: true,
+    animation: {
+      animateRotate: true,
+      animateScale: true
+    },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: function(context) {
+            return `${context.label}: ${context.parsed} reports`;
+          }
+        }
+      }
+    }
+  };
+
+  const trendLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May'];
+  const trendData = {
+    labels: trendLabels,
+    datasets: [
+      {
+        label: 'Reports',
+        data: [22, 38, 45, 62, 54],
+        fill: false,
+        borderColor: '#3b82f6',
+        backgroundColor: '#3b82f6',
+        tension: 0.4,
+        pointRadius: 5,
+        pointHoverRadius: 8,
+      }
+    ]
+  };
+
+  const trendOptions = {
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: function(context) {
+            return `Reports: ${context.parsed.y}`;
+          }
+        }
+      }
+    },
+    scales: {
+      x: { grid: { display: false } },
+      y: { grid: { display: false }, beginAtZero: true }
+    },
+    animation: {
+      duration: 1200,
+      easing: 'easeOutQuart'
+    }
+  };
+
   return (
     <div className="w-full space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Reports by Status (pie) */}
-        <div className="bg-white rounded-lg border-2 border-blue-800 shadow p-4">
+        <div className="bg-white rounded-lg border-2 border-blue-800 shadow p-4 flex flex-col items-center">
           <h3 className="text-sm font-semibold text-[#204080] mb-4">Reports by Status</h3>
-          <div className="flex items-center gap-6">
-            <div
-              className="w-28 h-28 rounded-full shadow flex-none"
-              style={{
-                background:
-                  'conic-gradient(#10b981 0 40%, #3b82f6 40% 75%, #9ca3af 75% 100%)'
-              }}
-              aria-hidden
-            />
-            <div className="flex-1">
-              <ul className="space-y-2 text-sm text-[#204080]">
-                <li className="flex items-center gap-3"><span className="w-3 h-3 rounded-full bg-[#10b981]" />Resolved</li>
-                <li className="flex items-center gap-3"><span className="w-3 h-3 rounded-full bg-[#3b82f6]" />Active</li>
-                <li className="flex items-center gap-3"><span className="w-3 h-3 rounded-full bg-[#9ca3af]" />New</li>
-              </ul>
+          <div className="w-full flex flex-col items-center">
+            <div className="w-36 h-36">
+              <Pie data={statusPieData} options={statusPieOptions} />
+            </div>
+            <div className="flex flex-col gap-2 mt-4 w-full">
+              {statusData.map(s => (
+                <div key={s.label} className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded-full" style={{ background: s.color }}></span>
+                  <span className="font-semibold text-[#204080]">{s.label}</span>
+                  <span className="text-xs text-gray-500 ml-auto">{s.value} reports</span>
+                </div>
+              ))}
+            </div>
+            <div className="mt-4 text-xs text-gray-700 text-center w-full">
+              <strong>Summary:</strong> Most reports are resolved, showing strong community response. Active cases are being investigated, and new reports are monitored daily.
             </div>
           </div>
         </div>
@@ -227,22 +307,42 @@ const CitizenPanel = ({ recentReports = [], activity = [], user }) => {
         {/* Reports Trend (mini line) */}
         <div className="bg-white rounded-lg border-2 border-blue-800 shadow p-4">
           <h3 className="text-sm font-semibold text-[#204080] mb-4">Reports Trend</h3>
-          <svg viewBox="0 0 120 48" className="w-full h-24">
-            <polyline
-              fill="none"
-              stroke="#3b82f6"
-              strokeWidth="3"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              points="0,36 18,26 36,30 54,16 72,22 90,10 108,18 120,14"
-            />
-            <g fill="#fff" stroke="none">
-              <circle cx="18" cy="26" r="1.6" fill="#3b82f6" />
-              <circle cx="54" cy="16" r="1.6" fill="#3b82f6" />
-              <circle cx="90" cy="10" r="1.6" fill="#3b82f6" />
-            </g>
-          </svg>
-          <div className="text-xs text-gray-500 mt-2">Jan — May</div>
+          <div className="w-full flex flex-col items-center">
+            <div className="w-full max-w-[420px] h-[220px]">
+              <Line data={trendData} options={{
+                ...trendOptions,
+                plugins: {
+                  ...trendOptions.plugins,
+                  legend: { display: true, position: 'top' },
+                  tooltip: {
+                    ...trendOptions.plugins.tooltip,
+                    enabled: true,
+                    mode: 'index',
+                    intersect: false,
+                    callbacks: {
+                      label: function(context) {
+                        return `Reports: ${context.parsed.y}`;
+                      }
+                    }
+                  }
+                },
+                animation: {
+                  duration: 1200,
+                  easing: 'easeOutQuart'
+                },
+                scales: {
+                  x: { grid: { display: true, color: "#e5edfa" }, title: { display: true, text: "Month" } },
+                  y: { grid: { display: true, color: "#e5edfa" }, title: { display: true, text: "Reports" }, beginAtZero: true }
+                }
+              }} />
+            </div>
+            <div className="mt-4 text-sm text-gray-700 text-center w-full">
+              <strong>Summary:</strong> Reports increased steadily from January to April, peaking at 62. May saw a slight decrease, indicating improved safety measures and community awareness.
+            </div>
+            <div className="mt-2 text-xs text-gray-500 text-center w-full">
+              <span>Hover over points for details. Trend helps track safety improvements and incident frequency.</span>
+            </div>
+          </div>
         </div>
 
          
@@ -271,24 +371,6 @@ const CitizenPanel = ({ recentReports = [], activity = [], user }) => {
          
       </div>
 
-     
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-     
-
-       
       </div>
     
   );
@@ -469,13 +551,17 @@ const Dashboard = () => {
 
           {/* Quick Actions & Activity Feed */}
           <motion.div className="space-y-6" initial="initial" animate="animate" variants={fadeInUp}>
-            <div className="bg-white rounded-lg border-2 border-blue-800 shadow p-4">
-              <h3 className="text-sm font-semibold text-[#204080] mb-3">Incident Map</h3>
-              <div className="w-full h-40 rounded-md bg-gray-100 overflow-hidden">
+            <div
+              className="bg-white rounded-lg border-2 border-blue-800 shadow p-4 flex flex-col"
+              style={{ minHeight: "480px" }}
+            >
+              <h3 className="text-lg font-bold text-[#204080] mb-4">Incident Map</h3>
+              <div className="w-full h-[400px] rounded-md bg-gray-100 overflow-hidden">
                 <MapContainer
                   center={[19.0760, 72.8777]}
-                  zoom={12}
-                  scrollWheelZoom={false}
+                  zoom={13}
+                  scrollWheelZoom={true}
+                  dragging={true}
                   style={{ height: "100%", width: "100%" }}
                 >
                   <TileLayer
@@ -483,7 +569,11 @@ const Dashboard = () => {
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                   />
                   {/* Auto-fit all markers */}
-                  <FitBounds positions={recentReports.map(r => [r.lat, r.lng])} />
+                  <FitBounds positions={[
+                    ...recentReports.map(r => [r.lat, r.lng]),
+                    ...policeStations.map(s => [s.lat, s.lng])
+                  ]} />
+                  {/* Incident markers */}
                   {recentReports.map((report) => (
                     <Marker key={report.id} position={[report.lat, report.lng]}>
                       <Popup>
@@ -494,7 +584,19 @@ const Dashboard = () => {
                       </Popup>
                     </Marker>
                   ))}
+                  {/* Police station markers */}
+                  {policeStations.map((station) => (
+                    <Marker key={station.id} position={[station.lat, station.lng]}>
+                      <Popup>
+                        <strong>{station.name}</strong><br />
+                        Police Station
+                      </Popup>
+                    </Marker>
+                  ))}
                 </MapContainer>
+              </div>
+              <div className="mt-4 text-xs text-gray-700 text-center w-full">
+                <strong>Tip:</strong> You can zoom, pan, and click markers for details. Blue markers show police stations, others show incidents.
               </div>
             </div>
            
@@ -536,5 +638,12 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
+const policeStations = [
+  { id: 1, name: 'Central Police Station', lat: 19.0765, lng: 72.8779 },
+  { id: 2, name: 'Metro Security HQ', lat: 19.0790, lng: 72.8810 },
+  { id: 3, name: 'Civic Watch Post', lat: 19.0730, lng: 72.8740 },
+  { id: 4, name: 'Cyber Cell Office', lat: 19.0750, lng: 72.8780 }
+];
 
 

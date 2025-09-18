@@ -3,12 +3,8 @@
   "version": "1.0.0",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js",
-    "dev": "nodemon app.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "test:watch": "nodemon --exec \"npm test\"",
-    "lint": "echo \"Linting not configured\"",
-    "build": "echo \"Build process not required for Node.js\""
+    "start": "node server.js",
+    "build": "cd client && npm install && npm run build"
   },
   "keywords": [],
   "author": "",

@@ -36,7 +36,11 @@ app.use("/api/police", policeRoute);
 // 5. Static Frontend Files ko Serve Karna
 // Yeh code API routes ke BAAD aur catch-all route se PEHLE hona chahiye.
 const frontendBuildPath = path.resolve(__dirname, '../frontend/build');
+// Serve React build
 app.use(express.static(path.join(__dirname, "../client/build")));
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../client/build", "index.html"));
+});
 app.use(express.static(frontendBuildPath));
 
 

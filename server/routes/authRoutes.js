@@ -276,7 +276,7 @@ router.post('/forgot-password', async (req, res) => {
         await user.save();
 
 
-        const resetUrl = `http://localhost:5173/reset-password/${resetToken}`;
+        const resetUrl = `https://crimeta.onrender.com/reset-password/${resetToken}`;
 
         await transporter.sendMail({
             from: 'Crimeta', to: email,

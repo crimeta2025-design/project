@@ -23,10 +23,10 @@ const PolicePanel = () => {
         setLoading(true);
         const token = localStorage.getItem('authToken');
         const [casesRes, statsRes] = await Promise.all([
-          fetch('https://project1-er3b.onrender.com/api/police/cases', {
+          fetch('https://crimeta1.onrender.com/api/police/cases', {
             headers: { 'Authorization': `Bearer ${token}` }
           }),
-          fetch('https://project1-er3b.onrender.com/api/police/stats', {
+          fetch('https://crimeta1.onrender.com/api/police/stats', {
             headers: { 'Authorization': `Bearer ${token}` }
           })
         ]);

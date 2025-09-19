@@ -28,7 +28,7 @@ const MyReports = () => {
         setLoading(true);
         const token = localStorage.getItem('authToken');
         // Make sure your backend URL is correct
-        const API_URL = 'https://project1-er3b.onrender.com/user/my-reports'; 
+        const API_URL = 'https://crimeta1.onrender.com/user/my-reports'; 
 
         const response = await fetch(API_URL, {
           headers: {

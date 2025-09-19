@@ -36,7 +36,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (email, password) => {
-    const API_URL = 'http://localhost:8080/auth/login';
+    const API_URL = 'https://crimeta1.onrender.com/auth/login';
 
     const response = await fetch(API_URL, {
       method: 'POST',

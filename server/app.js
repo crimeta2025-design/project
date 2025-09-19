@@ -34,15 +34,6 @@ app.use("/api/police", policeRoute);
 // Agar tum frontend alag Render Static Site par host kar rahe ho, 
 // toh ye part hata bhi sakte ho.
 // Agar same backend se serve karna ho to rakho:
-const clientBuildPath = path.join(__dirname, "../client/build");
-if (process.env.NODE_ENV === "production") {
-  app.use(express.static(clientBuildPath));
-
-  // React ke liye catch-all route
-  app.get("*", (req, res) => {
-    res.sendFile(path.resolve(clientBuildPath, "index.html"));
-  });
-}
 
 // 6. Server ko Start Karna
 const PORT = process.env.PORT || 8080;

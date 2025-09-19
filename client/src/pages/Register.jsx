@@ -71,7 +71,7 @@ const Register = () => {
             navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true });
         });
         
-        API_URL = 'http://localhost:8080/auth/register/department';
+        API_URL = 'https://project1-er3b.onrender.com/auth/register/department';
         payload = {
             name: formData.name,
             email: formData.email,
@@ -85,7 +85,7 @@ const Register = () => {
             longitude: position.coords.longitude,
         };
       } else { // citizen
-        API_URL = 'http://localhost:8080/auth/register/user';
+        API_URL = 'https://project1-er3b.onrender.com/auth/register/user';
         payload = {
             name: formData.name,
             email: formData.email,
@@ -121,7 +121,7 @@ const Register = () => {
     setError('');
     try {
       const payload = { email: formData.email, receivedOtp: otp };
-      const API_URL = 'http://localhost:8080/auth/verify-otp';
+      const API_URL = 'https://project1-er3b.onrender.com//auth/verify-otp';
       const response = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

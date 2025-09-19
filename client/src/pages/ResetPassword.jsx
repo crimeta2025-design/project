@@ -21,7 +21,7 @@ const ResetPassword = () => {
         setMessage('');
         setError('');
         try {
-            const API_URL = `http://localhost:8080/auth/reset-password/${token}`;
+            const API_URL = `https://project1-er3b.onrender.com/auth/reset-password/${token}`;
             const response = await fetch(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

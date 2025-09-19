@@ -78,7 +78,7 @@ const ReportCrime = () => {
 
     try {
       // Your backend API endpoint
-      const API_URL = 'http://localhost:8080/user/create'; 
+      const API_URL = 'https://project1-er3b.onrender.com/user/create'; 
       const token = localStorage.getItem('authToken');
 
       const response = await fetch(API_URL, {

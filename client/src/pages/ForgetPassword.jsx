@@ -13,7 +13,7 @@ const ForgotPassword = () => {
         setMessage('');
         setError('');
         try {
-            const API_URL = 'http://localhost:8080/auth/forgot-password';
+            const API_URL = 'https://project1-er3b.onrender.com/auth/forgot-password';
             const response = await fetch(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

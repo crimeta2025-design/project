@@ -44,49 +44,49 @@ router.post('/register/user', async (req, res) => {
         });
         await user.save();
 
-        await transporter.sendMail({
-            from: 'Crimeta', to: email,
-            subject: 'Verify Your Account | Crimeta',
-            html: `
-              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; background-color: #ffffff;">
+        // await transporter.sendMail({
+        //     from: 'Crimeta', to: email,
+        //     subject: 'Verify Your Account | Crimeta',
+        //     html: `
+        //       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; background-color: #ffffff;">
       
-                <!-- Logo -->
-                <div style="text-align: center; margin-bottom: 20px;">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Police_badge_icon.svg/1024px-Police_badge_icon.svg.png" alt="Crimeta Logo" width="70" style="margin-bottom: 10px;" />
-                <h2 style="color: #333; margin: 0;">Crimeta</h2>
-            </div>
+        //         <!-- Logo -->
+        //         <div style="text-align: center; margin-bottom: 20px;">
+        //         <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Police_badge_icon.svg/1024px-Police_badge_icon.svg.png" alt="Crimeta Logo" width="70" style="margin-bottom: 10px;" />
+        //         <h2 style="color: #333; margin: 0;">Crimeta</h2>
+        //     </div>
 
-            <!-- Greeting -->
-                <p style="font-size: 16px; color: #333;">Hello <b>${name}</b>,</p>
+        //     <!-- Greeting -->
+        //         <p style="font-size: 16px; color: #333;">Hello <b>${name}</b>,</p>
       
-            <!-- Message -->
-            <p style="font-size: 15px; color: #555; line-height: 1.6;">
-                Thank you for signing up with <b>Crimeta - Crime Reporter</b>.<br />
-                To complete your registration, please use the One-Time Password (OTP) below:
-            </p>
+        //     <!-- Message -->
+        //     <p style="font-size: 15px; color: #555; line-height: 1.6;">
+        //         Thank you for signing up with <b>Crimeta - Crime Reporter</b>.<br />
+        //         To complete your registration, please use the One-Time Password (OTP) below:
+        //     </p>
 
-            <!-- OTP Box -->
-            <div style="text-align: center; margin: 30px 0;">
-                <span style="display: inline-block; padding: 12px 25px; background-color: #87CEEB; color: #000; font-size: 20px; font-weight: bold; border-radius: 6px; letter-spacing: 2px;">
-                ${otp}
-                </span>
-            </div>
+        //     <!-- OTP Box -->
+        //     <div style="text-align: center; margin: 30px 0;">
+        //         <span style="display: inline-block; padding: 12px 25px; background-color: #87CEEB; color: #000; font-size: 20px; font-weight: bold; border-radius: 6px; letter-spacing: 2px;">
+        //         ${otp}
+        //         </span>
+        //     </div>
 
-            <!-- Extra Note -->
-            <p style="font-size: 14px; color: #777; line-height: 1.5;">
-                This OTP will expire in 10 minutes. Please do not share it with anyone for security reasons.
-            </p>
+        //     <!-- Extra Note -->
+        //     <p style="font-size: 14px; color: #777; line-height: 1.5;">
+        //         This OTP will expire in 10 minutes. Please do not share it with anyone for security reasons.
+        //     </p>
 
-            <!-- Footer -->
-                <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
-                <p style="font-size: 13px; color: #999; text-align: center;">
-                Regards,<br />
-                <b>Team Crimeta</b><br />
-                Crime Reporter Platform
-                </p>
-            </div>
-                    `
-        });
+        //     <!-- Footer -->
+        //         <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
+        //         <p style="font-size: 13px; color: #999; text-align: center;">
+        //         Regards,<br />
+        //         <b>Team Crimeta</b><br />
+        //         Crime Reporter Platform
+        //         </p>
+        //     </div>
+        //             `
+        // });
 
 
         res.status(201).json({ msg: 'Registration successful! Please check your email for OTP.', email: email });

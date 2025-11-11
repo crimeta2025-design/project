@@ -6,91 +6,72 @@ const User = require('../models/User');
 const crypto = require('crypto');
 const sgMail = require('@sendgrid/mail');
 
+// Set the API key for SendGrid
+// This runs once when the file is loaded
 sgMail.setApiKey(process.env.EMAIL); 
 
-// 3. 'nodemailer' transporter ki ab zaroorat nahi hai
-/*
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: { ... }
-});
-*/
-
-
-// 1. Normal Citizen Registration (With OTP based)
+// --- 1. Normal Citizen Registration (With OTP based) ---
 router.post('/register/user', async (req, res) => {
-     try {
-        const { name, email, password, contact_number } = req.body;
-        if (!name || !email || !password || !contact_number) {
-            return res.status(400).json({ msg: 'Please enter all fields.' });
-        }
 
-        if (await User.findOne({ email })) {
-            return res.status(400).json({ msg: 'User with this email already exists.' });
-        }
+    try {
+        const { name, email, password, contact_number } = req.body;
+        if (!name || !email || !password || !contact_number) {
+            return res.status(400).json({ msg: 'Please enter all fields.' });
+        }
 
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
-        const hashedOtp = await bcrypt.hash(otp, salt);
+        if (await User.findOne({ email })) {
+            return res.status(400).json({ msg: 'User with this email already exists.' });
+        }
 
-        const user = new User({
-            name, email, password: hashedPassword, contact_number,
-            role: 'citizen',
-            status: 'pending_verification',
-            otp: hashedOtp,
-            otpExpiry: Date.now() + 10 * 60 * 1000
-        });
-        await user.save();
+        // Hash password and create OTP
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const hashedOtp = await bcrypt.hash(otp, salt);
 
-        // --- SENDGRID (Nodemailer ko replace kiya) ---
+        const user = new User({
+            name, email, password: hashedPassword, contact_number,
+            role: 'citizen',
+            status: 'pending_verification',
+            otp: hashedOtp,
+            otpExpiry: Date.now() + 10 * 60 * 1000 // 10 minutes
+        });
+        
+        console.log("Step 1: User object created.");
+        await user.save();
+        console.log("Step 2: User saved to database (MongoDB).");
+
+        // Create the email message
         const msg = {
-            to: email, // User ka email
-            from: 'crimeta2025@gmail.com', // Aapka verified SendGrid sender
+            to: email,
+            from: verifiedSender, // IMPORTANT: Must be your verified sender
             subject: 'Verify Your Account | Crimeta',
-            html: `
-              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; background-color: #ffffff;">
-        
-                <div style="text-align: center; margin-bottom: 20px;">
-                  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Police_badge_icon.svg/1024px-Police_badge_icon.svg.png" alt="Crimeta Logo" width="70" style="margin-bottom: 10px;" />
-                  <h2 style="color: #333; margin: 0;">Crimeta</h2>
-                </div>
-
-                <p style="font-size: 16px; color: #333;">Hello <b>${name}</b>,</p>
-        
-                <p style="font-size: 15px; color: #555; line-height: 1.6;">
-                  Thank you for signing up with <b>Crimeta - Crime Reporter</b>.<br />
-                  To complete your registration, please use the One-Time Password (OTP) below:
-                </p>
-
-                <div style="text-align: center; margin: 30px 0;">
-                  <span style="display: inline-block; padding: 12px 25px; background-color: #87CEEB; color: #000; font-size: 20px; font-weight: bold; border-radius: 6px; letter-spacing: 2px;">
-                    ${otp}
-                  </span>
-                </div>
-
-                <p style="font-size: 14px; color: #777; line-height: 1.5;">
-                  This OTP will expire in 10 minutes. Please do not share it with anyone for security reasons.
-                </p>
-
-                <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
-                <p style="font-size: 13px; color: #999; text-align: center;">
-                  Regards,<br />
-                  <b>Team Crimeta</b><br />
-                  Crime Reporter Platform
-                </p>
-              </div>
-            `
+            html: `... (Your HTML template) ... Your OTP is: ${otp} ...` // Full template
         };
+        
+        console.log(`Step 3: Sending email (to: ${email})...`);
+        
+        // --- THIS IS THE LINE THAT IS LIKELY HANGING ---
+        await sgMail.send(msg); 
 
-        await sgMail.send(msg); // Email bhejein
-        // --- END SENDGRID ---
+        console.log("✅ Step 4: Email sent successfully (Accepted by SendGrid).");
 
-        res.status(201).json({ msg: 'Registration successful! Please check your email for OTP.', email: email });
-    } catch (error) {
-        console.error("REGISTER USER ERROR:", error); // Error ko log karein
-        res.status(500).json({ error: error.message });
-    }
+        res.status(201).json({ msg: 'Registration successful! Please check your email for OTP.', email: email });
+
+    } catch (error) {
+        // This block will run if sgMail.send() fails (rejects the promise)
+        console.error("❌ ERROR (CATCH BLOCK): Failed to send email!");
+        console.error(error); // Print the full error object
+
+        if (error.response) {
+            // If it's a specific SendGrid error (like '401 Unauthorized')
+            console.error("--- SendGrid Error Details ---");
+            console.error(error.response.body);
+            console.error("------------------------------");
+        }
+        
+        res.status(500).json({ error: "Failed to send email.", details: error.message });
+    }
 });
 
 // 2. Department Registration Request 

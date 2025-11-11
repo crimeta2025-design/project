@@ -44,7 +44,7 @@ router.post('/register/user', async (req, res) => {
         // Create the email message
         const msg = {
             to: email,
-            from: verifiedSender, // IMPORTANT: Must be your verified sender
+            from: 'crimeta2025@gmail.com', // IMPORTANT: Must be your verified sender
             subject: 'Verify Your Account | Crimeta',
             html: `... (Your HTML template) ... Your OTP is: ${otp} ...` // Full template
         };

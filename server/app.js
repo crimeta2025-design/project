@@ -10,6 +10,15 @@ const path = require("path");
 
 const app = express();
 
+
+
+app.use(express.static("public", {
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith(".css")) {
+      res.setHeader("Content-Type", "text/css");
+    }
+  }
+}));
 // 2. Middleware
 app.use(cors({
   origin: "*",

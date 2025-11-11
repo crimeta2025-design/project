@@ -12,13 +12,14 @@ const app = express();
 
 
 
-app.use(express.static("public", {
+app.use("/src", express.static(path.join(__dirname, "..", "src"), {
   setHeaders: (res, filePath) => {
     if (filePath.endsWith(".css")) {
       res.setHeader("Content-Type", "text/css");
     }
   }
 }));
+
 // 2. Middleware
 app.use(cors({
   origin: "*",

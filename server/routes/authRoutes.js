@@ -56,7 +56,7 @@ router.post('/register/user', async (req, res) => {
                 </div>`
         };
 
-        console.log(`Sending OTP ${otp} to ${email}`); // Testing ke liye logs mein dikhega
+        console.log(`Sending OTP ${otp} to ${email}`); // Testing 
         await transporter.sendMail(mailOptions);
 
         res.status(201).json({ msg: 'Registration successful! Check your email for OTP.', email: email });

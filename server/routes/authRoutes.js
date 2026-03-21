@@ -7,7 +7,6 @@ const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 
 // --- NODEMAILER TRANSPORTER SETUP ---
-// Isme hum Gmail ka use kar rahe hain taaki tokens ki limit na ho
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -57,6 +56,7 @@ router.post('/register/user', async (req, res) => {
         };
 
         console.log(`Sending OTP ${otp} to ${email}`); // Testing 
+        console.log(`Sending OTP ${otp} to ${email}`); // Testing ke liye logs mein dikhega
         await transporter.sendMail(mailOptions);
 
         res.status(201).json({ msg: 'Registration successful! Check your email for OTP.', email: email });
@@ -108,7 +108,7 @@ router.post('/register/department', async (req, res) => {
     }
 });
 
-// --- VERIFY OTP ROUTE (Koi badlaav nahi) ---
+
 router.post('/verify-otp', async (req, res) => {
     try {
         const { email, receivedOtp } = req.body;
@@ -132,7 +132,6 @@ router.post('/verify-otp', async (req, res) => {
 });
 
 
-// --- LOGIN ROUTE (Koi badlaav nahi) ---
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;

@@ -108,7 +108,7 @@ router.post('/register/department', async (req, res) => {
     }
 });
 
-// --- 3. VERIFY OTP ---
+// --- VERIFY OTP ROUTE (Koi badlaav nahi) ---
 router.post('/verify-otp', async (req, res) => {
     try {
         const { email, receivedOtp } = req.body;
@@ -131,7 +131,8 @@ router.post('/verify-otp', async (req, res) => {
     }
 });
 
-// --- 4. LOGIN ---
+
+// --- LOGIN ROUTE (Koi badlaav nahi) ---
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;

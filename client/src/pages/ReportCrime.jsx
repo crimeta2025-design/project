@@ -141,42 +141,48 @@ const ReportCrime = () => {
 
   // Merged JSX: Structure and CSS from the first file, connected to the second file's logic
   return (
-    <div className="min-h-screen bg-[#ffffff] text-gray-900 py-8">
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans py-8 pb-12">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header from file 1 */}
         <motion.div 
-          className="mb-8"
+          className="mb-8 bg-white rounded-[2.5rem] p-6 sm:p-8 border border-slate-200 shadow-sm relative overflow-hidden"
           initial="initial"
           animate="animate"
           variants={fadeInUp}
         >
-          <div className="flex items-center space-x-3 mb-4">
-            <AlertTriangle className="w-8 h-8 text-[#00C9A7]" />
-            <h1 className="text-3xl font-bold text-blue-900">Report an Incident</h1>
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-rose-500 via-orange-500 to-amber-500"></div>
+          <div className="flex items-center space-x-4 mb-2">
+            <div className="p-4 rounded-[1.5rem] bg-rose-50 text-rose-600 border border-rose-100">
+              <AlertTriangle className="w-8 h-8" />
+            </div>
+            <div>
+              <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">Report an Incident</h1>
+              <p className="font-bold text-[11px] tracking-wider uppercase text-slate-500 mt-1">
+                Help keep your community safe by reporting incidents. All reports are taken seriously and handled with care.
+              </p>
+            </div>
           </div>
-          <p className="text-gray-900">
-            Help keep your community safe by reporting incidents. All reports are taken seriously and handled with care.
-          </p>
         </motion.div>
 
         {/* Form container from file 1 */}
         <motion.div 
-          className="bg-gray-100 backdrop-blur-md rounded-lg border border-blue-800 p-8"
+          className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm p-6 sm:p-8 relative overflow-hidden"
           initial="initial"
           animate="animate"
           variants={fadeInUp}
         >
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-indigo-400 to-purple-400"></div>
+          <form onSubmit={handleSubmit} className="space-y-8 pl-4">
             {/* Error display logic from file 2, styled for light theme */}
             {error && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md text-sm" role="alert">
+              <div className="bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-xl text-sm font-semibold" role="alert">
                 {error}
               </div>
             )}
             
             {/* Incident Type: UI from file 1, logic from file 2 */}
             <div>
-              <label className="block text-sm font-medium text-gray-900 mb-3">
+              <label className="block text-[11px] font-black uppercase tracking-wider text-slate-800 mb-4">
                 Type of Incident *
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
@@ -185,10 +191,10 @@ const ReportCrime = () => {
                   return (
                     <label
                       key={type}
-                      className={`rounded-lg border cursor-pointer transition-all duration-200 text-center flex items-center justify-center px-2 py-2 sm:py-3 min-h-[52px] sm:min-h-[60px] leading-tight ${
+                      className={`rounded-[1.25rem] border cursor-pointer transition-all duration-200 text-center flex items-center justify-center px-2 py-2 sm:py-3 min-h-[52px] sm:min-h-[60px] leading-tight ${
                         active
-                          ? 'border-[#0028c9] bg-[#00C9A7]/10 shadow-sm'
-                          : 'border-black bg-white hover:bg-gray-50'
+                          ? 'border-indigo-500 bg-indigo-50 shadow-sm ring-2 ring-indigo-100'
+                          : 'border-slate-200 bg-slate-50 hover:bg-white hover:border-indigo-200'
                       }`}
                     >
                       <input
@@ -201,8 +207,8 @@ const ReportCrime = () => {
                         required
                         aria-label={type}
                       />
-                      <span className={`break-words whitespace-normal text-[11px] xs:text-xs sm:text-sm font-medium ${
-                        active ? 'text-black' : 'text-gray-900 font-normal'
+                      <span className={`break-words whitespace-normal text-[11px] font-bold uppercase tracking-wider ${
+                        active ? 'text-indigo-700' : 'text-slate-500'
                       }`}>
                         {type}
                       </span>
@@ -210,23 +216,23 @@ const ReportCrime = () => {
                   );
                 })}
               </div>
-              <div className="sm:hidden mt-2 text-[11px] text-gray-500">Tap a category. Long names wrap automatically.</div>
+              <div className="sm:hidden mt-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">Tap a category. Long names wrap automatically.</div>
               
               {/* Special description for 'Other' incident type */}
               {formData.incidentType === 'Other' && (
                 <div className="mt-4">
-                  <label className="block text-sm font-medium text-gray-900 mb-2">
+                  <label className="block text-[11px] font-black uppercase tracking-wider text-slate-800 mb-2">
                     Please describe the Other type of incident (required)
                   </label>
                   <div className="relative">
-                    <FileText className="absolute left-3 top-3 w-5 h-5 text-gray-800" />
+                    <FileText className="absolute left-4 top-4 w-5 h-5 text-slate-400" />
                     <textarea
                       name="otherDescription"
                       value={formData.otherDescription}
                       onChange={handleChange}
                       required
                       rows={4}
-                      className="w-full pl-10 pr-4 py-3 bg-white border border-black rounded-lg text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#00C9A7] focus:border-transparent transition-all duration-200 resize-none"
+                      className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-[1.25rem] text-slate-900 placeholder-slate-400 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all duration-200 resize-none"
                       placeholder="Describe the specific Other type of incident..."
                     />
                   </div>
@@ -236,21 +242,21 @@ const ReportCrime = () => {
 
             {/* Severity Level: Section from file 1 */}
             <div>
-              <label className="block text-sm font-medium text-gray-900 mb-3">
+              <label className="block text-[11px] font-black uppercase tracking-wider text-slate-800 mb-4">
                 Severity Level
               </label>
-              <div className="flex space-x-4">
+              <div className="flex flex-wrap gap-4">
                 {[
-                  { value: 'low', label: 'Low', color: 'bg-green-500' },
-                  { value: 'medium', label: 'Medium', color: 'bg-orange-500' },
-                  { value: 'high', label: 'High', color: 'bg-red-500' }
+                  { value: 'low', label: 'Low', color: 'bg-emerald-500', bgBorder: 'border-emerald-500 bg-emerald-50' },
+                  { value: 'medium', label: 'Medium', color: 'bg-amber-400', bgBorder: 'border-amber-400 bg-amber-50' },
+                  { value: 'high', label: 'High', color: 'bg-rose-500', bgBorder: 'border-rose-500 bg-rose-50' }
                 ].map((severity) => (
                   <label
                     key={severity.value}
-                    className={`flex items-center space-x-2 p-3 rounded-lg border cursor-pointer transition-all duration-200 ${
+                    className={`flex items-center space-x-2 p-3 rounded-xl border cursor-pointer transition-all duration-200 ${
                       formData.severity === severity.value
-                        ? 'border-[#00C9A7] bg-[#00C9A7]/10'
-                        : 'border-black bg-white hover:bg-gray-50'
+                        ? severity.bgBorder + ' shadow-sm'
+                        : 'border-slate-200 bg-slate-50 hover:bg-white'
                     }`}
                   >
                     <input
@@ -262,8 +268,8 @@ const ReportCrime = () => {
                       className="sr-only"
                     />
                     <div className={`w-3 h-3 rounded-full ${severity.color}`}></div>
-                    <span className={`text-sm ${
-                      formData.severity === severity.value ? 'text-black font-medium' : 'text-gray-900'
+                    <span className={`text-[11px] font-bold uppercase tracking-wider ${
+                      formData.severity === severity.value ? 'text-slate-900' : 'text-slate-500'
                     }`}>
                       {severity.label}
                     </span>
@@ -274,18 +280,18 @@ const ReportCrime = () => {
 
             {/* Location: UI from file 1, logic from file 2 */}
             <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">
+              <label className="block text-[11px] font-black uppercase tracking-wider text-slate-800 mb-2">
                 Location Address *
               </label>
               <div className="relative">
-                <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-800" />
+                <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
                 <input
                   type="text"
                   name="locationAddress"
                   value={formData.locationAddress}
                   onChange={handleChange}
                   required
-                  className="w-full pl-10 pr-4 py-3 bg-white border border-black rounded-lg text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#00C9A7] focus:border-transparent transition-all duration-200"
+                  className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-[1.25rem] text-slate-900 placeholder-slate-400 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all duration-200"
                   placeholder="Enter the address or area of the incident"
                 />
               </div>
@@ -294,7 +300,7 @@ const ReportCrime = () => {
             {/* Date and Time: UI from file 1, logic from file 2 */}
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-900 mb-2">Date *</label>
+                <label className="block text-[11px] font-black uppercase tracking-wider text-slate-800 mb-2">Date *</label>
                 <div className="relative">
                   <input
                     type="date"
@@ -302,21 +308,21 @@ const ReportCrime = () => {
                     value={formData.incidentDate}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-3 bg-white border border-black rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-[#00C9A7] focus:border-transparent transition-all duration-200"
+                    className="w-full px-4 py-4 bg-slate-50 border border-slate-200 rounded-[1.25rem] text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all duration-200"
                   />
                 </div>
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-900 mb-2">Time</label>
+                <label className="block text-[11px] font-black uppercase tracking-wider text-slate-800 mb-2">Time</label>
                 <div className="relative">
-                  <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-800" />
+                  <Clock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
                   <input
                     type="time"
                     name="incidentTime"
                     value={formData.incidentTime}
                     onChange={handleChange}
-                    className="w-full pl-10 pr-4 py-3 bg-white border border-black rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-[#00C9A7] focus:border-transparent transition-all duration-200"
+                    className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-[1.25rem] text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all duration-200"
                   />
                 </div>
               </div>
@@ -324,16 +330,16 @@ const ReportCrime = () => {
 
             {/* Description: UI from file 1, logic from file 2 */}
             <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">Description *</label>
+              <label className="block text-[11px] font-black uppercase tracking-wider text-slate-800 mb-2">Description *</label>
               <div className="relative">
-                <FileText className="absolute left-3 top-3 w-5 h-5 text-gray-800" />
+                <FileText className="absolute left-4 top-4 w-5 h-5 text-slate-400" />
                 <textarea
                   name="description"
                   value={formData.description}
                   onChange={handleChange}
                   required
                   rows={6}
-                  className="w-full pl-10 pr-4 py-3 bg-white border border-black rounded-lg text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#00C9A7] focus:border-transparent transition-all duration-200 resize-none"
+                  className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-[1.25rem] text-slate-900 placeholder-slate-400 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all duration-200 resize-none"
                   placeholder="Provide a detailed description of what happened..."
                 />
               </div>
@@ -341,8 +347,8 @@ const ReportCrime = () => {
 
             {/* File Upload: UI from file 1, logic from file 2 */}
             <div>
-              <label className="block text-sm font-medium text-gray-900 mb-2">Evidence (Photos/Videos)</label>
-              <div className="border-2 border-dashed border-black rounded-lg p-6 hover:border-[#00C9A7] transition-colors">
+              <label className="block text-[11px] font-black uppercase tracking-wider text-slate-800 mb-2">Evidence (Photos/Videos)</label>
+              <div className="border-2 border-dashed border-slate-300 rounded-[1.25rem] p-8 hover:border-indigo-500 hover:bg-indigo-50/50 transition-colors bg-slate-50">
                 <input
                   type="file"
                   multiple
@@ -352,9 +358,11 @@ const ReportCrime = () => {
                   id="file-upload"
                 />
                 <label htmlFor="file-upload" className="flex flex-col items-center justify-center cursor-pointer">
-                  <Upload className="w-12 h-12 text-gray-800 mb-3" />
-                  <p className="text-gray-900 text-center">Click to upload or drag and drop</p>
-                  <p className="text-gray-600 text-sm mt-1">PNG, JPG, MP4 up to 10MB each</p>
+                  <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm border border-slate-200 mb-4">
+                    <Upload className="w-8 h-8 text-indigo-500" />
+                  </div>
+                  <p className="text-slate-800 font-bold">Click to upload or drag and drop</p>
+                  <p className="text-slate-500 text-[11px] font-bold uppercase tracking-wider mt-2">PNG, JPG, MP4 up to 10MB each</p>
                 </label>
               </div>
 
@@ -365,12 +373,12 @@ const ReportCrime = () => {
                       <img
                         src={URL.createObjectURL(file)}
                         alt={`Evidence ${index + 1}`}
-                        className="w-full h-24 object-cover rounded-lg"
+                        className="w-full h-24 object-cover rounded-xl shadow-sm border border-slate-200"
                       />
                       <button
                         type="button"
                         onClick={() => removeImage(index)}
-                        className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute -top-2 -right-2 bg-rose-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
                       >
                         <X className="w-4 h-4" />
                       </button>
@@ -389,9 +397,9 @@ const ReportCrime = () => {
                 checked={formData.isAnonymous} 
                 onChange={handleChange} 
                 id="isAnonymous"
-                className="w-4 h-4 text-[#00C9A7] bg-gray-200 border-gray-400 rounded focus:ring-[#00C9A7] focus:ring-offset-0 focus:ring-2" 
+                className="w-4 h-4 text-indigo-600 bg-slate-100 border-slate-300 rounded focus:ring-indigo-500 focus:ring-offset-0 focus:ring-2" 
               />
-              <label htmlFor="isAnonymous" className="text-sm text-gray-900">Submit this report anonymously</label>
+              <label htmlFor="isAnonymous" className="text-sm text-slate-800 font-medium">Submit this report anonymously</label>
             </div>
             */}
 
@@ -400,10 +408,10 @@ const ReportCrime = () => {
               type="submit"
               disabled={loading}
               whileTap={{ scale: 0.98 }}
-              className="w-full bg-gradient-to-r from-[#0086c9] to-[#005ea6] text-white py-3 rounded-lg font-semibold flex items-center justify-center space-x-2 hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-4 rounded-xl font-bold flex items-center justify-center space-x-2 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed mt-4"
             >
               {loading ? (
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
               ) : (
                 <>
                   <Send className="w-5 h-5" />
@@ -416,16 +424,19 @@ const ReportCrime = () => {
 
         {/* Emergency Notice from file 1 */}
         <motion.div 
-          className="mt-8 bg-red-100 border border-red-300 rounded-lg p-6"
+          className="mt-8 bg-rose-50 border border-rose-200 rounded-[2rem] p-6 sm:p-8 relative overflow-hidden"
           initial="initial"
           animate="animate"
           variants={fadeInUp}
         >
-          <div className="flex items-start space-x-3">
-            <AlertTriangle className="w-6 h-6 text-red-600 mt-0.5" />
+          <div className="absolute top-0 left-0 w-1.5 h-full bg-rose-500"></div>
+          <div className="flex items-start space-x-4">
+            <div className="p-3 bg-white rounded-2xl shadow-sm border border-rose-100 shrink-0">
+              <AlertTriangle className="w-6 h-6 text-rose-500" />
+            </div>
             <div>
-              <h3 className="text-red-800 font-semibold mb-2">Emergency Situations</h3>
-              <p className="text-red-700 text-sm">
+              <h3 className="text-rose-900 font-black tracking-tight text-lg mb-1">Emergency Situations</h3>
+              <p className="text-rose-700 text-sm font-medium leading-relaxed">
                 If you are experiencing an emergency or immediate danger, please call 112 immediately. 
                 This form is for non-emergency reporting only.
               </p>

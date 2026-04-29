@@ -291,14 +291,7 @@ const ACCENT_COLOR = "#00C9A7";
 
 // (Removed filters/time filters per user request)
 
-// Tricolor bar component
-const TricolorBar = () => (
-  <div className="w-full h-1 flex">
-    <div className="flex-1 bg-orange-500"></div>
-    <div className="flex-1 bg-white"></div>
-    <div className="flex-1 bg-green-600"></div>
-  </div>
-);
+
 
 export default function MapView() {
   // ------------ Enhanced state management -----------
@@ -556,37 +549,36 @@ export default function MapView() {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div className="h-screen bg-[#ffffff] text-gray-900 flex flex-col">
-      <TricolorBar />
+    <div className="h-screen bg-slate-50 text-slate-900 font-sans flex flex-col pb-4 pt-6">
       
       {/* Header - Fixed height */}
-  <div className="hidden md:block flex-shrink-0 px-4 sm:px-6 py-4">
-        <div className="mb-4">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+  <div className="hidden md:block flex-shrink-0 px-4 sm:px-6 mb-4">
+        <div className="bg-white rounded-[2.5rem] p-6 sm:p-8 border border-slate-200 shadow-sm relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-500"></div>
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
             <div className="flex items-center space-x-4">
-              <MapPin className="w-8 h-8 lg:w-10 lg:h-10 text-[var(--accent-color,#00C9A7)]" />
+              <div className="p-4 rounded-[1.5rem] bg-indigo-50 text-indigo-600 border border-indigo-100">
+                <MapPin className="w-8 h-8" />
+              </div>
               <div>
-                <h1
-                  className="text-xl lg:text-2xl xl:text-3xl font-black tracking-tight"
-                  style={{ color: GOV_BLUE }}
-                >
-                  Official Community Incident Map
+                <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+                  Live Incident Map
                 </h1>
-                <span className="text-xs lg:text-sm text-gray-700">
+                <p className="font-bold text-[11px] tracking-wider uppercase text-slate-500 mt-1">
                   Real-time map view of local incident reports
-                </span>
+                </p>
               </div>
             </div>
 
             {/* Location Controls - Responsive with consistent button sizes */}
             <div className="flex flex-wrap items-center gap-2">
               {/* Location Status Indicator */}
-              <div className="flex items-center gap-2 px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg">
-                <MapPin className="w-4 h-4 text-green-600" />
-                <span className="text-sm text-gray-700">
+              <div className="flex items-center gap-2 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl shadow-sm">
+                <MapPin className={`w-4 h-4 ${isTracking ? 'text-emerald-500' : 'text-slate-400'}`} />
+                <span className="text-[11px] font-black uppercase tracking-wider text-slate-700">
                   {isTracking ? (
                     <span className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                      <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.6)]"></div>
                       Live Tracking
                     </span>
                   ) : (
@@ -601,7 +593,7 @@ export default function MapView() {
                   <button
                     onClick={startLocationTracking}
                     disabled={isTracking}
-                    className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-lg transition-colors font-medium"
+                    className="flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white rounded-xl transition-all shadow-sm hover:shadow font-bold text-sm"
                   >
                     <MapPin className="w-4 h-4" />
                     <span>Start Tracking</span>
@@ -611,14 +603,14 @@ export default function MapView() {
                     <button
                       onClick={centerOnUserLocation}
                       disabled={!userLocation}
-                      className="flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white rounded-lg transition-colors font-medium"
+                      className="flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white rounded-xl transition-all shadow-sm hover:shadow font-bold text-sm"
                     >
                       <Navigation className="w-4 h-4" />
                       <span>Center Map</span>
                     </button>
                     <button
                       onClick={stopLocationTracking}
-                      className="flex items-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors font-medium"
+                      className="flex items-center gap-2 px-6 py-3 bg-rose-600 hover:bg-rose-700 text-white rounded-xl transition-all shadow-sm hover:shadow font-bold text-sm"
                     >
                       <span>Stop</span>
                     </button>
@@ -628,9 +620,9 @@ export default function MapView() {
 
               {/* Location Error Display */}
               {locationError && (
-                <div className="flex items-center gap-2 px-4 py-3 bg-red-100 border border-red-300 rounded-lg max-w-md">
-                  <AlertTriangle className="w-4 h-4 text-red-600 flex-shrink-0" />
-                  <span className="text-sm text-red-700">{locationError}</span>
+                <div className="flex items-center gap-2 px-4 py-3 bg-rose-50 border border-rose-200 rounded-xl max-w-md shadow-sm">
+                  <AlertTriangle className="w-4 h-4 text-rose-600 flex-shrink-0" />
+                  <span className="text-[11px] font-bold text-rose-700">{locationError}</span>
                 </div>
               )}
 
@@ -667,41 +659,47 @@ export default function MapView() {
       <div className="flex-1 overflow-hidden px-4 sm:px-6 pb-4">
         <div className="h-full flex gap-4">
           {/* Sidebar - Collapsible on mobile (filters removed) */}
-          <aside className="hidden lg:flex lg:w-80 xl:w-96 flex-col gap-4 overflow-y-auto">
+          <aside className="hidden lg:flex lg:w-80 xl:w-96 flex-col gap-6 overflow-y-auto pb-4">
             {/* Statistics (kept) */}
-            <section className="bg-white rounded-2xl border border-blue-100 shadow-md p-4">
-              <div className="flex items-center mb-4 gap-2">
-                <BarChart3 className="w-5 h-5 text-blue-800" />
-                <h2 className="font-bold text-lg" style={{ color: GOV_BLUE }}>
+            <section className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm p-6 sm:p-8 relative overflow-hidden group">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-purple-500 opacity-80"></div>
+              <div className="flex items-center mb-6 gap-3">
+                <div className="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl border border-indigo-100">
+                  <BarChart3 className="w-5 h-5" />
+                </div>
+                <h2 className="font-black tracking-tight text-xl text-slate-900">
                   Quick Stats
                 </h2>
               </div>
-              <div className="space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Total Incidents</span>
-                  <span className="font-bold text-blue-900">
+              <div className="space-y-4">
+                <div className="flex justify-between items-center pb-3 border-b border-slate-100">
+                  <span className="text-[11px] font-black uppercase tracking-wider text-slate-500">Total Incidents</span>
+                  <span className="font-black text-xl text-indigo-600">
                     {filteredIncidents.length}
                   </span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">High Priority</span>
-                  <span className="font-bold text-red-600">
+                <div className="flex justify-between items-center pb-3 border-b border-slate-100">
+                  <span className="text-[11px] font-black uppercase tracking-wider text-slate-500">High Priority</span>
+                  <span className="font-black text-xl text-rose-500">
                     {filteredIncidents.filter((i) => i.severity === "high").length}
                   </span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Last 24hrs</span>
-                  <span className="font-bold text-orange-600">8</span>
+                <div className="flex justify-between items-center pb-1">
+                  <span className="text-[11px] font-black uppercase tracking-wider text-slate-500">Last 24hrs</span>
+                  <span className="font-black text-xl text-amber-500">8</span>
                 </div>
               </div>
             </section>
 
             {/* Category Legend - Show always */}
-            <section className="bg-white rounded-2xl border border-blue-100 shadow-md p-4 mt-4">
-              <div className="flex items-center mb-3 gap-2">
-                <div className="w-5 h-5 text-blue-800">🏷️</div>
-                <h2 className="font-bold text-sm" style={{ color: GOV_BLUE }}>
-                  Category Symbols
+            <section className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm p-6 sm:p-8 relative overflow-hidden flex-1">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-80"></div>
+              <div className="flex items-center mb-6 gap-3">
+                <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl border border-emerald-100 flex items-center justify-center">
+                  <Layers className="w-5 h-5" />
+                </div>
+                <h2 className="font-black tracking-tight text-xl text-slate-900">
+                  Legend
                 </h2>
               </div>
               <div className="grid grid-cols-2 gap-2 text-xs">
@@ -743,43 +741,46 @@ export default function MapView() {
           <main className="flex-1 flex flex-col">
             {/* Map container - Full height */}
             <section
-              className="flex-1 bg-white rounded-2xl border border-blue-100 shadow-md overflow-hidden flex flex-col"
+              className="flex-1 bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden flex flex-col relative"
             >
-              <div className="flex-shrink-0 p-3 border-b border-blue-100">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-cyan-500 z-10"></div>
+              <div className="flex-shrink-0 p-5 border-b border-slate-100 z-10 bg-white/80 backdrop-blur-md">
                 {/* Desktop Header */}
                 <div className="hidden sm:flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-600 via-blue-600 to-cyan-500 flex items-center justify-center shadow-md">
-                      <Shield className="w-4 h-4 text-white" />
-                    </div>
-                    <h2 className="font-bold text-lg" style={{ color: GOV_BLUE }}>
-                      Live Incident Map
-                    </h2>
-                  </div>
                   <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-2 text-sm text-gray-600 whitespace-nowrap">
-                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                      <span>Live Updates</span>
+                    <div className="w-10 h-10 rounded-[1.25rem] bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center shadow-sm">
+                      <Shield className="w-5 h-5 text-white" />
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Layers className="w-4 h-4 text-blue-800" />
-                      <div className="flex bg-gray-100 rounded-lg p-1 overflow-x-auto no-scrollbar">
+                    <div>
+                      <h2 className="font-black text-lg text-slate-900 tracking-tight leading-tight">
+                        Map View
+                      </h2>
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.6)]"></div>
+                        <span className="text-[10px] font-black uppercase tracking-wider text-emerald-600">Live Connection</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 bg-slate-50 p-1.5 rounded-xl border border-slate-200 shadow-sm">
+                      <Layers className="w-4 h-4 text-slate-400 ml-1.5" />
+                      <div className="flex gap-1 overflow-x-auto no-scrollbar">
                         {['street','satellite','hybrid','terrain'].map(opt => (
                           <button
                             key={opt}
                             onClick={() => setMapView(opt)}
-                            className={`px-3 py-1 text-xs font-medium rounded-md flex-shrink-0 transition-colors whitespace-nowrap ${mapView === opt ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}
+                            className={`px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider rounded-lg flex-shrink-0 transition-all whitespace-nowrap ${mapView === opt ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-500 hover:bg-slate-200 hover:text-slate-700'}`}
                           >
-                            {opt.charAt(0).toUpperCase()+opt.slice(1)}
+                            {opt}
                           </button>
                         ))}
                       </div>
                     </div>
                     <button
                       onClick={() => setShowHeatmap(h=>!h)}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${showHeatmap ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all whitespace-nowrap shadow-sm border ${showHeatmap ? 'bg-rose-50 border-rose-200 text-rose-700' : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100'}`}
                     >
-                      <div className={`w-2 h-2 rounded-full ${showHeatmap ? 'bg-white' : 'bg-red-600'}`}></div>
+                      <div className={`w-2.5 h-2.5 rounded-full shadow-sm ${showHeatmap ? 'bg-rose-500' : 'bg-slate-300'}`}></div>
                       {showHeatmap ? 'Heatmap ON' : 'Heatmap OFF'}
                     </button>
                   </div>
@@ -1016,24 +1017,26 @@ export default function MapView() {
               </div>
 
               {/* Map footer with controls */}
-              <div className="flex-shrink-0 p-3 bg-gray-50 border-t border-gray-200">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-gray-600">
+              <div className="flex-shrink-0 p-4 bg-slate-50 border-t border-slate-100 z-10 rounded-b-[2.5rem]">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-[11px] font-bold uppercase tracking-wider text-slate-500">
                   <div className="flex flex-wrap items-center gap-4">
-                    <div className="flex items-center gap-1">
-                      <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                    <div className="flex items-center gap-1.5 bg-white px-2 py-1 rounded-md border border-slate-200 shadow-sm">
+                      <div className="w-2 h-2 bg-rose-500 rounded-full"></div>
                       <span>High Priority</span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                    <div className="flex items-center gap-1.5 bg-white px-2 py-1 rounded-md border border-slate-200 shadow-sm">
+                      <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
                       <span>Medium Priority</span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <div className="flex items-center gap-1.5 bg-white px-2 py-1 rounded-md border border-slate-200 shadow-sm">
+                      <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
                       <span>Your Location</span>
                     </div>
                   </div>
-                  <div className="text-right">
-                    {filteredIncidents.length} incidents shown • Last updated: just now
+                  <div className="text-right flex items-center gap-2">
+                    <span className="text-indigo-600">{filteredIncidents.length} incidents</span>
+                    <span>•</span>
+                    <span>Last updated: just now</span>
                   </div>
                 </div>
               </div>

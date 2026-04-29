@@ -66,21 +66,21 @@ const MyReports = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'resolved': return 'bg-green-100 text-green-800 border-green-300';
-      case 'in_progress': return 'bg-blue-100 text-blue-800 border-blue-300';
-      case 'new': return 'bg-orange-100 text-orange-800 border-orange-300';
-      case 'rejected': return 'bg-red-100 text-red-800 border-red-300';
-      default: return 'bg-gray-100 text-gray-800 border-gray-300';
+      case 'resolved': return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+      case 'in_progress': return 'bg-indigo-50 text-indigo-700 border-indigo-200';
+      case 'new': return 'bg-amber-50 text-amber-700 border-amber-200';
+      case 'rejected': return 'bg-rose-50 text-rose-700 border-rose-200';
+      default: return 'bg-slate-50 text-slate-700 border-slate-200';
     }
   };
   
   const getSeverityColor = (severity) => {
     // Handling case-insensitivity from API (e.g., 'High', 'high')
     switch (severity?.toLowerCase()) {
-      case 'high': return 'bg-red-500';
-      case 'medium': return 'bg-orange-500';
-      case 'low': return 'bg-green-500';
-      default: return 'bg-gray-500';
+      case 'high': return 'bg-rose-500';
+      case 'medium': return 'bg-amber-400';
+      case 'low': return 'bg-emerald-500';
+      default: return 'bg-slate-500';
     }
   };
 
@@ -120,23 +120,28 @@ const MyReports = () => {
 
   // Merged JSX: UI from file 1, logic from file 2
   return (
-    <div className="min-h-screen bg-gray-50 text-black">
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans pb-12 pt-6">
     
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div 
-          className="mb-8"
+          className="mb-8 bg-white rounded-[2.5rem] p-6 sm:p-8 border border-slate-200 shadow-sm relative overflow-hidden"
           initial="initial"
           animate="animate"
           variants={fadeInUp}
         >
-          <div className="flex items-center space-x-3 mb-4">
-            <FileText className="w-8 h-8 text-blue-800" />
-            <h1 className="text-3xl font-bold text-blue-800">My Reports</h1>
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-500"></div>
+          <div className="flex items-center space-x-4 mb-2">
+            <div className="p-4 rounded-[1.5rem] bg-indigo-50 text-indigo-600 border border-indigo-100">
+              <FileText className="w-8 h-8" />
+            </div>
+            <div>
+              <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">My Reports</h1>
+              <p className="font-bold text-[11px] tracking-wider uppercase text-slate-500 mt-1">
+                Track and manage all your submitted incident reports.
+              </p>
+            </div>
           </div>
-          <p className="text-gray-600">
-            Track and manage all your submitted incident reports.
-          </p>
         </motion.div>
 
         {/* Stats Overview - dynamically calculated from API data */}
@@ -147,34 +152,37 @@ const MyReports = () => {
           animate="animate"
         >
           {[
-            { label: 'Total Reports', value: reports.length, color: 'from-blue-500 to-indigo-600' },
-            { label: 'Resolved', value: reports.filter(r => r.status === 'resolved').length, color: 'from-green-500 to-teal-600' },
-            { label: 'In Progress', value: reports.filter(r => r.status === 'in_progress').length, color: 'from-orange-500 to-red-600' },
-            { label: 'New Reports', value: reports.filter(r => r.status === 'new').length, color: 'from-purple-500 to-pink-600' }
+            { label: 'Total Reports', value: reports.length, color: 'from-indigo-500 to-indigo-600' },
+            { label: 'Resolved', value: reports.filter(r => r.status === 'resolved').length, color: 'from-emerald-500 to-emerald-600' },
+            { label: 'In Progress', value: reports.filter(r => r.status === 'in_progress').length, color: 'from-amber-500 to-amber-600' },
+            { label: 'New Reports', value: reports.filter(r => r.status === 'new').length, color: 'from-rose-500 to-rose-600' }
           ].map((stat, index) => (
             <motion.div
               key={index}
               variants={fadeInUp}
-              className="bg-gray-50 rounded-lg border border-gray-200 p-6 shadow-sm"
+              className="bg-white rounded-[2.5rem] border border-slate-200 p-6 shadow-sm relative overflow-hidden group hover:shadow-md hover:-translate-y-1 transition-all duration-300"
             >
-              <div className={`w-12 h-12 rounded-lg bg-gradient-to-r ${stat.color} flex items-center justify-center mb-3 text-white`}>
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <div className={`w-12 h-12 rounded-[1.25rem] bg-gradient-to-br ${stat.color} flex items-center justify-center mb-4 text-white shadow-sm`}>
                 <FileText className="w-6 h-6" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-800 mb-1">{stat.value}</h3>
-              <p className="text-gray-500 text-sm">{stat.label}</p>
+              <h3 className="text-3xl font-black text-slate-900 mb-1">{stat.value}</h3>
+              <p className="text-slate-500 text-[11px] font-black uppercase tracking-wider">{stat.label}</p>
             </motion.div>
           ))}
         </motion.div>
 
         {/* Filters and Controls - UI from file 2, styled for light theme */}
         <motion.div 
-          className="bg-gray-50 rounded-lg border border-gray-200 p-4 mb-8"
+          className="bg-white rounded-[2rem] border border-slate-200 shadow-sm p-5 mb-8"
           variants={fadeInUp}
         >
           <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
             <div className="flex items-center space-x-3">
-              <Filter className="w-5 h-5 text-gray-500" />
-              <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <div className="p-2 bg-slate-100 rounded-xl">
+                <Filter className="w-5 h-5 text-slate-500" />
+              </div>
+              <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none min-w-[140px]">
                 <option value="all">All Status</option>
                 <option value="new">New</option>
                 <option value="in_progress">In Progress</option>
@@ -183,8 +191,8 @@ const MyReports = () => {
               </select>
             </div>
             <div className="flex items-center space-x-3">
-              <span className="text-gray-600 text-sm">Sort by:</span>
-              <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="bg-white border border-gray-300 rounded-lg px-3 py-2 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <span className="text-[11px] font-black uppercase tracking-wider text-slate-500">Sort by:</span>
+              <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 appearance-none min-w-[140px]">
                 <option value="newest">Newest First</option>
                 <option value="oldest">Oldest First</option>
                 <option value="status">Status</option>
@@ -201,59 +209,60 @@ const MyReports = () => {
           animate="animate"
         >
           {sortedReports.length === 0 ? (
-            <motion.div variants={fadeInUp} className="text-center py-16 bg-gray-50 rounded-lg">
-              <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">No Reports Found</h3>
-              <p className="text-gray-500">No reports match the current filter.</p>
+            <motion.div variants={fadeInUp} className="text-center py-16 bg-white rounded-[2.5rem] border border-slate-200 shadow-sm">
+              <FileText className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+              <h3 className="text-xl font-black text-slate-800 mb-2">No Reports Found</h3>
+              <p className="text-slate-500 text-sm font-semibold">No reports match the current filter.</p>
             </motion.div>
           ) : (
             sortedReports.map((report) => (
               <motion.div
                 key={report._id}
                 variants={fadeInUp}
-                className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm transition-all duration-300 hover:shadow-md"
+                className="bg-white rounded-[2.5rem] border border-slate-200 p-6 sm:p-8 shadow-sm relative overflow-hidden hover:shadow-md transition-all duration-300 group"
               >
-                <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between space-y-4 lg:space-y-0">
+                <div className="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-indigo-400 to-purple-400"></div>
+                <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between space-y-4 lg:space-y-0 pl-4">
                   <div className="flex-1">
-                    <div className="flex items-center space-x-3 mb-3">
-                      <div className={`w-4 h-4 rounded-full flex-shrink-0 ${getSeverityColor(report.severity)}`}></div>
-                      <h3 className="text-xl font-semibold text-gray-800 ">{report.incidentType}</h3>
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium border capitalize ${getStatusColor(report.status)}`}>
+                    <div className="flex items-center space-x-3 mb-4">
+                      <div className={`w-3 h-3 rounded-full flex-shrink-0 ${getSeverityColor(report.severity)} ring-4 ring-slate-50`}></div>
+                      <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">{report.incidentType}</h3>
+                      <span className={`px-3 py-1 rounded-full text-[10px] font-black tracking-wider uppercase border capitalize ${getStatusColor(report.status)}`}>
                         {report.status.replace('_', ' ')}
                       </span>
                     </div>
 
-                    <p className="text-gray-600 mb-4">{report.description}</p>
+                    <p className="text-slate-600 mb-6 text-sm sm:text-base leading-relaxed">{report.description}</p>
 
-                    <div className="grid md:grid-cols-3 gap-4 mb-4 text-sm">
-                      <div className="flex items-center space-x-2 text-gray-500">
-                        <MapPin className="w-4 h-4 flex-shrink-0" />
+                    <div className="flex flex-wrap gap-4 mb-4 text-xs font-semibold text-slate-500">
+                      <div className="flex items-center space-x-1.5 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-100">
+                        <MapPin className="w-4 h-4 flex-shrink-0 text-indigo-500" />
                         <span>{report.locationAddress}</span>
                       </div>
-                      <div className="flex items-center space-x-2 text-gray-500">
-                        <Calendar className="w-4 h-4 flex-shrink-0" />
+                      <div className="flex items-center space-x-1.5 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-100">
+                        <Calendar className="w-4 h-4 flex-shrink-0 text-indigo-500" />
                         <span>{new Date(report.incidentDate).toLocaleDateString()}</span>
                       </div>
-                      <div className="flex items-center space-x-2 text-gray-500">
-                        <Clock className="w-4 h-4 flex-shrink-0" />
+                      <div className="flex items-center space-x-1.5 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-100">
+                        <Clock className="w-4 h-4 flex-shrink-0 text-indigo-500" />
                         <span>{new Date(report.incidentDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                       </div>
                     </div>
 
                     {/* Case Updates: Safely render if updates array exists */}
                     {report.updates && report.updates.length > 0 && (
-                      <div className="bg-gray-50 rounded-lg p-4 mt-4 border border-gray-200">
-                        <h4 className="text-gray-700 font-medium mb-3 flex items-center space-x-2">
+                      <div className="bg-slate-50 rounded-[1.5rem] p-5 mt-6 border border-slate-100">
+                        <h4 className="text-[11px] font-black uppercase tracking-wider text-slate-800 mb-4 flex items-center space-x-2">
                           {getStatusIcon(report.status)}
                           <span>Case Updates</span>
                         </h4>
-                        <div className="space-y-3">
+                        <div className="space-y-4">
                           {report.updates.map((update, idx) => (
-                            <div key={idx} className="flex items-start space-x-3">
-                              <div className="w-2 h-2 bg-blue-500 rounded-full mt-1.5 flex-shrink-0"></div>
-                              <div>
-                                <p className="text-gray-800 text-sm">{update.message}</p>
-                                <p className="text-gray-400 text-xs">{new Date(update.date).toLocaleDateString()}</p>
+                            <div key={idx} className="flex items-start space-x-4">
+                              <div className="w-2.5 h-2.5 bg-indigo-500 rounded-full mt-1.5 flex-shrink-0 ring-4 ring-white shadow-sm"></div>
+                              <div className="bg-white border border-slate-100 rounded-2xl p-3 flex-1 shadow-sm">
+                                <p className="text-slate-800 text-sm font-semibold">{update.message}</p>
+                                <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mt-1">{new Date(update.date).toLocaleDateString()}</p>
                               </div>
                             </div>
                           ))}

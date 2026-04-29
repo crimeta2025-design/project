@@ -19,7 +19,8 @@ import {
   ChevronDown,
   ChevronUp,
   Star,
-  BadgePercent
+  BadgePercent,
+  Activity
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
@@ -44,27 +45,27 @@ TricolorBar.propTypes = { show: PropTypes.bool };
 // ====== Utility Color Helpers ======
 const getStatusColor = (status) => {
   switch (status) {
-    case 'resolved': return 'bg-green-100 text-green-800 border-green-300';
-    case 'investigating': return 'bg-[#e0e7f7] text-[#204080] border-[#b3c1ec]';
-    case 'pending': return 'bg-orange-100 text-orange-800 border-orange-300';
-    default: return 'bg-gray-100 text-gray-700 border-gray-300';
+    case 'resolved': return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+    case 'investigating': return 'bg-indigo-50 text-indigo-700 border-indigo-200';
+    case 'pending': return 'bg-amber-50 text-amber-700 border-amber-200';
+    default: return 'bg-slate-50 text-slate-700 border-slate-200';
   }
 };
 
 const getSeverityColor = (severity) => {
   switch (severity) {
-    case 'high': return 'bg-red-500';
-    case 'medium': return 'bg-yellow-400';
-    case 'low': return 'bg-green-500';
-    default: return 'bg-gray-500';
+    case 'high': return 'bg-rose-500';
+    case 'medium': return 'bg-amber-400';
+    case 'low': return 'bg-emerald-500';
+    default: return 'bg-slate-500';
   }
 };
 
 const getRoleClass = (role, light = false) => {
-  if (role === 'citizen') return light ? 'bg-green-50 border-green-600 text-[#204080]' : 'bg-green-600';
-  if (role === 'police') return light ? 'bg-yellow-50 border-yellow-500 text-[#204080]' : 'bg-yellow-400';
-  if (role === 'admin') return light ? 'bg-red-50 border-red-500 text-[#204080]' : 'bg-red-500';
-  return 'bg-gray-50 border-gray-300 text-[#204080]';
+  if (role === 'citizen') return light ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-emerald-500 text-white';
+  if (role === 'police') return light ? 'bg-indigo-50 border-indigo-200 text-indigo-800' : 'bg-indigo-500 text-white';
+  if (role === 'admin') return light ? 'bg-rose-50 border-rose-200 text-rose-800' : 'bg-rose-500 text-white';
+  return 'bg-slate-50 border-slate-200 text-slate-800';
 };
 
 const FAKE_DEPARTMENT_STATS = [
@@ -92,21 +93,20 @@ const StatCard = ({ stat, alt }) => {
         initial: { opacity: 0, y: 28 },
         animate: { opacity: 1, y: 0 },
       }}
-      className={`rounded-lg border-2 shadow-md p-6 hover:bg-[#2953a7]/10 transition-all duration-300
-        ${alt ? 'bg-white border-yellow-700' : 'bg-white border-blue-800'}
-      `}
+      className="relative overflow-hidden rounded-[2.5rem] border border-slate-200 shadow-sm p-6 hover:shadow-md hover:-translate-y-1 transition-all duration-300 bg-white group"
     >
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500/20 via-purple-500/20 to-pink-500/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
       <div className="flex items-center justify-between mb-4">
-        <div className={`w-12 h-12 rounded-lg flex items-center justify-center shadow ${stat.iconBg || 'bg-blue-700'}`}>
+        <div className={`w-12 h-12 rounded-[1.25rem] flex items-center justify-center shadow-sm ${stat.iconBg || 'bg-indigo-600 text-white'}`}>
           <Icon className="w-6 h-6 text-white" />
         </div>
-        <div className={`flex items-center space-x-1 text-sm ${stat.trend === 'up' ? 'text-green-700' : 'text-red-600'}`}>
+        <div className={`flex items-center space-x-1 text-sm font-semibold ${stat.trend === 'up' ? 'text-emerald-600' : 'text-rose-600'}`}>
           {stat.trend === 'up' ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
           <span>{stat.change}</span>
         </div>
       </div>
-      <h3 className="text-2xl font-extrabold text-[#204080] mb-1">{stat.value}</h3>
-      <p className="text-gray-700 text-sm">{stat.title}</p>
+      <h3 className="text-3xl font-black text-slate-900 mb-1">{stat.value}</h3>
+      <p className="text-slate-500 text-[11px] font-black uppercase tracking-wider">{stat.title}</p>
     </motion.div>
   );
 };
@@ -120,54 +120,66 @@ StatCard.propTypes = {
 const DepartmentOverview = ({ stats }) => {
   const [open, setOpen] = useState(false);
   return (
-    <div className="bg-white rounded-lg border-2 border-blue-800 shadow p-0 sm:p-6">
+    <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm p-0 sm:p-6 relative overflow-hidden">
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-slate-200 to-indigo-100"></div>
       {/* Mobile accordion header */}
       <button
         type="button"
-        className="w-full flex sm:hidden items-center justify-between px-4 py-4 focus:outline-none focus:ring-2 focus:ring-blue-600 rounded-t-lg"
+        className="w-full flex sm:hidden items-center justify-between px-6 py-4 focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded-t-[2.5rem]"
         onClick={() => setOpen(o => !o)}
         aria-expanded={open}
       >
-        <span className="flex items-center font-semibold text-[#204080] text-base"><BadgePercent className="w-5 h-5 mr-2" />Department Overview</span>
-        {open ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+        <span className="flex items-center font-black uppercase text-slate-800 text-sm tracking-wider"><BadgePercent className="w-5 h-5 mr-2 text-indigo-500" />Department Overview</span>
+        {open ? <ChevronUp className="w-5 h-5 text-slate-500" /> : <ChevronDown className="w-5 h-5 text-slate-500" />}
       </button>
-      <h2 className="hidden sm:flex items-center text-lg font-bold text-[#204080] mb-2"><BadgePercent className="w-5 h-5 mr-2" />Department Overview</h2>
+      <h2 className="hidden sm:flex items-center text-sm font-black uppercase tracking-wider text-slate-800 mb-6"><BadgePercent className="w-5 h-5 mr-2 text-indigo-500" />Department Overview</h2>
       <div className={`sm:block ${open ? 'block' : 'hidden'} sm:!block`}> 
         {/* DepartmentOverview table wrapper */}
         <div className="w-full overflow-x-auto">
-          <table className="w-full text-left text-[#204080] min-w-[320px] sm:min-w-[520px]">
+          <table className="w-full text-left text-slate-700 min-w-[320px] sm:min-w-[520px]">
             <thead>
-              <tr className="text-xs uppercase bg-blue-100">
-                <th className="py-2 px-2">Department</th>
-                <th className="py-2 px-2">Members</th>
-                <th className="py-2 px-2">Open</th>
-                <th className="py-2 px-2">Resolved</th>
-                <th className="py-2 px-2">Satisfaction</th>
+              <tr className="text-[10px] font-black uppercase tracking-wider text-slate-400 border-b border-slate-100">
+                <th className="py-3 px-4">Department</th>
+                <th className="py-3 px-4">Members</th>
+                <th className="py-3 px-4">Open</th>
+                <th className="py-3 px-4">Resolved</th>
+                <th className="py-3 px-4">Satisfaction</th>
               </tr>
             </thead>
             <tbody>
               {stats.map((s, i) => (
-                <tr key={i} className="border-b last:border-b-0">
-                  <td className="py-2 px-2 text-sm font-medium">{s.dept}</td>
-                  <td className="py-2 px-2 text-sm">{s.members}</td>
-                  <td className="py-2 px-2 text-sm">{s.openCases}</td>
-                  <td className="py-2 px-2 text-sm">{s.resolved}</td>
-                  <td className="py-2 px-2 text-sm">{s.satisfaction}%</td>
+                <tr key={i} className="border-b border-slate-50 last:border-b-0 hover:bg-slate-50/50 transition-colors">
+                  <td className="py-4 px-4 text-sm font-bold text-slate-800">{s.dept}</td>
+                  <td className="py-4 px-4 text-sm font-medium">{s.members}</td>
+                  <td className="py-4 px-4 text-sm font-medium">
+                    <span className="bg-rose-50 text-rose-700 px-2 py-1 rounded-full text-xs font-bold">{s.openCases}</span>
+                  </td>
+                  <td className="py-4 px-4 text-sm font-medium">
+                    <span className="bg-emerald-50 text-emerald-700 px-2 py-1 rounded-full text-xs font-bold">{s.resolved}</span>
+                  </td>
+                  <td className="py-4 px-4 text-sm font-medium">
+                    <div className="flex items-center space-x-2">
+                      <span className="font-bold">{s.satisfaction}%</span>
+                      <div className="w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                        <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${s.satisfaction}%` }}></div>
+                      </div>
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
         {/* Mobile card view (for very narrow screens) */}
-        <div className="sm:hidden divide-y border-t mt-2">
+        <div className="sm:hidden divide-y divide-slate-100 mt-2 px-2 pb-4">
           {stats.map((s, i) => (
-            <div key={i} className="p-4 flex flex-col gap-1 text-sm">
-              <div className="font-semibold text-[#204080]">{s.dept}</div>
-              <div className="flex flex-wrap gap-3 text-xs text-[#204080]/80">
-                <span><span className="font-medium">Members:</span> {s.members}</span>
-                <span><span className="font-medium">Open:</span> {s.openCases}</span>
-                <span><span className="font-medium">Resolved:</span> {s.resolved}</span>
-                <span><span className="font-medium">Satisfaction:</span> {s.satisfaction}%</span>
+            <div key={i} className="p-4 flex flex-col gap-2 text-sm bg-slate-50/50 rounded-2xl mb-2">
+              <div className="font-bold text-slate-800 text-base">{s.dept}</div>
+              <div className="grid grid-cols-2 gap-3 text-xs text-slate-600 mt-1">
+                <div className="flex flex-col"><span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Members</span> <span className="font-semibold text-sm">{s.members}</span></div>
+                <div className="flex flex-col"><span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Open</span> <span className="font-semibold text-rose-600 text-sm">{s.openCases}</span></div>
+                <div className="flex flex-col"><span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Resolved</span> <span className="font-semibold text-emerald-600 text-sm">{s.resolved}</span></div>
+                <div className="flex flex-col"><span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Satisfaction</span> <span className="font-semibold text-indigo-600 text-sm">{s.satisfaction}%</span></div>
               </div>
             </div>
           ))}
@@ -181,16 +193,21 @@ DepartmentOverview.propTypes = { stats: PropTypes.array };
 
 // ====== Reports By Type Section (with icons) ======
 const ReportsByType = ({ data }) => (
-  <div className="bg-white rounded-lg border-2 border-yellow-700 shadow p-6 mb-6 w-full min-w-[220px]">
-    <h2 className="text-lg font-bold text-[#204080] mb-4 flex items-center"><BarChart3 className="w-5 h-5 mr-2" />Reports by Type</h2>
+  <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm p-6 mb-6 w-full min-w-[220px] relative overflow-hidden">
+    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-100 to-purple-100"></div>
+    <h2 className="text-sm font-black uppercase tracking-wider text-slate-800 mb-6 flex items-center"><BarChart3 className="w-5 h-5 mr-2 text-indigo-500" />Reports by Type</h2>
     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
       {data.map((r, i) => {
         const Icon = r.icon;
         return (
-          <div key={i} className="flex items-center space-x-3 p-4 rounded-lg bg-[#e5edfa]">
-            <Icon className={`w-7 h-7 ${r.color}`} />
-            <span className="font-bold text-lg text-[#204080]">{r.count}</span>
-            <span className="text-sm">{r.type}</span>
+          <div key={i} className="flex flex-col space-y-2 p-5 rounded-[1.5rem] bg-slate-50 hover:bg-indigo-50/50 transition-colors border border-slate-100">
+            <div className="flex items-center justify-between w-full">
+              <div className={`p-2 rounded-xl bg-white shadow-sm text-indigo-500`}>
+                <Icon className={`w-5 h-5`} />
+              </div>
+              <span className="font-black text-xl text-slate-800">{r.count}</span>
+            </div>
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">{r.type}</span>
           </div>
         );
       })}
@@ -284,8 +301,9 @@ const CitizenPanel = ({ recentReports = [], activity = [], user }) => {
     <div className="w-full space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Reports by Status (pie) */}
-        <div className="bg-white rounded-lg border-2 border-blue-800 shadow p-4 flex flex-col items-center">
-          <h3 className="text-sm font-semibold text-[#204080] mb-4">Reports by Status</h3>
+        <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm p-6 flex flex-col items-center relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500/10 to-transparent"></div>
+          <h3 className="text-[11px] font-black uppercase tracking-wider text-slate-800 mb-4 w-full text-left">Reports by Status</h3>
           <div className="w-full flex flex-col items-center">
             <div className="w-36 h-36">
               <Pie data={statusPieData} options={statusPieOptions} />
@@ -294,7 +312,7 @@ const CitizenPanel = ({ recentReports = [], activity = [], user }) => {
               {statusData.map(s => (
                 <div key={s.label} className="flex items-center gap-2">
                   <span className="w-3 h-3 rounded-full" style={{ background: s.color }}></span>
-                  <span className="font-semibold text-[#204080]">{s.label}</span>
+                  <span className="font-semibold text-slate-800">{s.label}</span>
                   <span className="text-xs text-gray-500 ml-auto">{s.value} reports</span>
                 </div>
               ))}
@@ -306,8 +324,9 @@ const CitizenPanel = ({ recentReports = [], activity = [], user }) => {
         </div>
 
         {/* Reports Trend (mini line) */}
-        <div className="bg-white rounded-lg border-2 border-blue-800 shadow p-4">
-          <h3 className="text-sm font-semibold text-[#204080] mb-4">Reports Trend</h3>
+        <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm p-6 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500/10 to-transparent"></div>
+          <h3 className="text-[11px] font-black uppercase tracking-wider text-slate-800 mb-4 w-full text-left">Reports Trend</h3>
           <div className="w-full flex flex-col items-center">
             <div className="w-full max-w-[420px] h-[220px]">
               <Line data={trendData} options={{
@@ -347,8 +366,9 @@ const CitizenPanel = ({ recentReports = [], activity = [], user }) => {
         </div>
 
         {/* Quick Actions */}
-        <div className={`bg-white rounded-lg border-2 border-yellow-700 shadow p-5 sm:p-6`}>
-          <h2 className="text-xl font-bold text-[#204080] mb-4">Quick Actions</h2>
+        <div className={`bg-white rounded-[2.5rem] border border-slate-200 shadow-sm p-6 flex flex-col relative overflow-hidden`}>
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500/10 to-transparent"></div>
+          <h2 className="text-[11px] font-black uppercase tracking-wider text-slate-800 mb-4 w-full text-left">Quick Actions</h2>
           <div className="space-y-3">
             {user?.role === 'citizen' && (
               <>
@@ -407,7 +427,7 @@ const Dashboard = () => {
       change: '+12%',
       trend: 'up',
       icon: BarChart3,
-      iconBg: 'bg-blue-700'
+      iconBg: 'bg-indigo-500'
     },
     {
       title: 'Resolved Cases',
@@ -415,7 +435,7 @@ const Dashboard = () => {
       change: '+8%',
       trend: 'up',
       icon: Shield,
-      iconBg: 'bg-green-700'
+      iconBg: 'bg-emerald-500'
     },
     {
       title: 'Active Cases',
@@ -423,7 +443,7 @@ const Dashboard = () => {
       change: '-2%',
       trend: 'down',
       icon: AlertTriangle,
-      iconBg: 'bg-yellow-600'
+      iconBg: 'bg-amber-500'
     },
     {
       title: 'Community Score',
@@ -431,7 +451,7 @@ const Dashboard = () => {
       change: '+5%',
       trend: 'up',
       icon: Users,
-      iconBg: 'bg-purple-700'
+      iconBg: 'bg-purple-500'
     }
   ]), []);
 
@@ -447,10 +467,10 @@ const Dashboard = () => {
 
   // ----- Activity Feed -----
   const activity = [
-    { text: "New report filed in Downtown area", minutes: 5, color: 'bg-green-600' },
-    { text: "Case #456 marked as resolved", minutes: 15, color: 'bg-yellow-600' },
-    { text: "Safety alert issued for Park area", minutes: 60, color: 'bg-[#204080]' },
-    { text: "Community patrol scheduled", minutes: 120, color: 'bg-orange-500' }
+    { text: "New report filed in Downtown area", minutes: 5, color: 'bg-indigo-500' },
+    { text: "Case #456 marked as resolved", minutes: 15, color: 'bg-emerald-500' },
+    { text: "Safety alert issued for Park area", minutes: 60, color: 'bg-amber-500' },
+    { text: "Community patrol scheduled", minutes: 120, color: 'bg-purple-500' }
   ];
 
   // ----- Animation -----
@@ -466,20 +486,21 @@ const Dashboard = () => {
 
   // ================ RENDER ================
   return (
-    <div className="min-h-screen bg-gray-50 text-black">
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans pb-12">
       {/* Main content */}
       <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header User Card */}
-        <motion.div className="mb-8" initial="initial" animate="animate" variants={fadeInUp}>
-          <div className={`rounded-lg p-5 sm:p-6 border-2 shadow flex flex-col sm:flex-row sm:items-center gap-6 ${getRoleClass(user?.role, true)}`}>
-            <div className={`p-4 rounded-full ${getRoleClass(user?.role)}`}>
-              <Shield className={`w-10 h-10 ${user?.role === 'police' ? 'text-[#204080]' : 'text-white'}`} />
+        <motion.div className="mb-8 mt-4" initial="initial" animate="animate" variants={fadeInUp}>
+          <div className={`bg-white rounded-[2.5rem] p-6 sm:p-8 border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center gap-6 relative overflow-hidden`}>
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-500"></div>
+            <div className={`p-4 rounded-[1.5rem] ${getRoleClass(user?.role, true)}`}>
+              <Shield className={`w-8 h-8`} />
             </div>
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold mb-1 leading-tight">{`Welcome,  ${user?.name || 'Guest'}`}</h1>
-              <p className={`font-medium ${user?.role === 'citizen' ? 'text-green-700'
-                : user?.role === 'police' ? 'text-yellow-700'
-                  : 'text-red-700'
+            <div className="flex-1">
+              <h1 className="text-3xl sm:text-4xl font-black mb-1 text-slate-900 tracking-tight">{`Welcome, ${user?.name || 'Guest'}`}</h1>
+              <p className={`font-bold text-[11px] tracking-wider uppercase ${user?.role === 'citizen' ? 'text-emerald-600'
+                : user?.role === 'police' ? 'text-indigo-600'
+                  : 'text-rose-600'
                 }`}>
                 {user?.role === 'citizen'
                   ? 'Community Safety Dashboard'
@@ -487,10 +508,14 @@ const Dashboard = () => {
                     ? 'Law Enforcement Portal'
                     : 'System Administration Center'}
               </p>
-              {user?.badge && (
-                <div className="text-gray-700 text-sm">Badge: {user?.badge} • {user?.department}</div>
-              )}
             </div>
+            {user?.badge && (
+              <div className="hidden sm:flex flex-col items-end">
+                <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Badge Number</span>
+                <span className="font-bold text-slate-700 bg-slate-100 px-3 py-1 rounded-full mt-1">{user?.badge}</span>
+                <span className="text-xs text-slate-500 mt-2 font-medium">{user?.department}</span>
+              </div>
+            )}
           </div>
         </motion.div>
 
@@ -522,32 +547,33 @@ const Dashboard = () => {
         <div className="grid gap-6 lg:gap-8 lg:grid-cols-3">
           {/* Recent Reports */}
           <motion.div className="lg:col-span-2" initial="initial" animate="animate" variants={fadeInUp}>
-            <div className="bg-white rounded-lg border-2 border-blue-800 shadow p-5 sm:p-6">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
-                <h2 className="text-lg sm:text-xl font-bold text-[#204080]">Recent Reports</h2>
-                <button className="self-start sm:self-auto text-sm font-semibold transition-colors text-blue-800 hover:text-yellow-700">View All</button>
+            <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm p-6 sm:p-8 relative overflow-hidden h-full">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500/10 to-transparent"></div>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-8">
+                <h2 className="text-[11px] font-black uppercase tracking-wider text-slate-800">Recent Reports</h2>
+                <button className="text-xs font-bold uppercase tracking-wider text-indigo-600 hover:text-indigo-800 transition-colors bg-indigo-50 px-4 py-2 rounded-full">View All</button>
               </div>
 
               <div className="space-y-4">
                 {recentReports.map((report) => (
                   <div key={report.id}
-                    className="bg-[#e5edfa] rounded-lg p-4 border border-[#c4d2ee] hover:bg-[#eef4fb] transition-all duration-200">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
-                      <div className="flex items-center space-x-3">
-                        <div className={`w-3 h-3 rounded-full ${getSeverityColor(report.severity)}`}></div>
-                        <h3 className="text-[#204080] font-semibold text-sm sm:text-base">{report.type}</h3>
+                    className="group bg-slate-50 rounded-[1.5rem] p-5 border border-slate-100 hover:border-indigo-100 hover:bg-white hover:shadow-sm transition-all duration-300">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
+                      <div className="flex items-center space-x-4">
+                        <div className={`w-2.5 h-2.5 rounded-full ${getSeverityColor(report.severity)} ring-4 ring-white shadow-sm`}></div>
+                        <h3 className="text-slate-900 font-bold text-base">{report.type}</h3>
                       </div>
-                      <span className={`inline-block w-fit px-2 py-1 rounded-full text-[10px] sm:text-xs border font-semibold capitalize ${getStatusColor(report.status)}`}>
+                      <span className={`inline-block w-fit px-3 py-1.5 rounded-full text-[10px] font-black tracking-wider uppercase ${getStatusColor(report.status)}`}>
                         {report.status}
                       </span>
                     </div>
-                    <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs sm:text-sm text-[#204080]/75">
-                      <div className="flex items-center space-x-1">
-                        <MapPin className="w-4 h-4" />
+                    <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs font-semibold text-slate-500 ml-6">
+                      <div className="flex items-center space-x-1.5 bg-slate-100/50 px-2 py-1 rounded-md">
+                        <MapPin className="w-3.5 h-3.5 text-slate-400" />
                         <span className="truncate max-w-[140px] sm:max-w-none">{report.location}</span>
                       </div>
-                      <div className="flex items-center space-x-1">
-                        <Clock className="w-4 h-4" />
+                      <div className="flex items-center space-x-1.5 bg-slate-100/50 px-2 py-1 rounded-md">
+                        <Clock className="w-3.5 h-3.5 text-slate-400" />
                         <span>{report.time}</span>
                       </div>
                     </div>
@@ -558,13 +584,14 @@ const Dashboard = () => {
           </motion.div>
 
           {/* Quick Actions & Activity Feed */}
-          <motion.div className="space-y-6" initial="initial" animate="animate" variants={fadeInUp}>
+          <motion.div className="space-y-6 lg:space-y-8" initial="initial" animate="animate" variants={fadeInUp}>
             <div
-              className="bg-white rounded-lg border-2 border-blue-800 shadow p-4 flex flex-col"
+              className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm p-6 flex flex-col relative overflow-hidden"
               style={{ minHeight: "480px" }}
             >
-              <h3 className="text-lg font-bold text-[#204080] mb-4">Incident Map</h3>
-              <div className="w-full h-[400px] rounded-md bg-gray-100 overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-slate-200 to-indigo-100"></div>
+              <h3 className="text-[11px] font-black uppercase tracking-wider text-slate-800 mb-6 flex items-center"><MapPin className="w-4 h-4 mr-2 text-indigo-500" />Incident Map</h3>
+              <div className="w-full h-[380px] rounded-[1.5rem] bg-slate-100 overflow-hidden border border-slate-200 shadow-inner">
                 <MapContainer
                   center={[19.0760, 72.8777]}
                   zoom={13}
@@ -573,8 +600,8 @@ const Dashboard = () => {
                   style={{ height: "100%", width: "100%" }}
                 >
                   <TileLayer
-                    attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    attribution='&copy; <a href="https://carto.com/attributions">CARTO</a>'
+                    url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
                   />
                   {/* Auto-fit all markers */}
                   <FitBounds positions={[
@@ -584,49 +611,57 @@ const Dashboard = () => {
                   {/* Incident markers */}
                   {recentReports.map((report) => (
                     <Marker key={report.id} position={[report.lat, report.lng]}>
-                      <Popup>
-                        <strong>{report.type}</strong><br />
-                        {report.location}<br />
-                        {report.time}<br />
-                        Status: {report.status}
+                      <Popup className="rounded-xl overflow-hidden shadow-sm border-0">
+                        <div className="p-1">
+                          <strong className="text-slate-900 block mb-1">{report.type}</strong>
+                          <span className="text-slate-600 text-xs block">{report.location}</span>
+                          <span className="text-slate-500 text-[10px] block mb-2">{report.time}</span>
+                          <span className={`inline-block px-2 py-1 rounded text-[9px] font-black uppercase ${getStatusColor(report.status)}`}>
+                            {report.status}
+                          </span>
+                        </div>
                       </Popup>
                     </Marker>
                   ))}
                   {/* Police station markers */}
                   {policeStations.map((station) => (
                     <Marker key={station.id} position={[station.lat, station.lng]}>
-                      <Popup>
-                        <strong>{station.name}</strong><br />
-                        Police Station
+                      <Popup className="rounded-xl overflow-hidden shadow-sm border-0">
+                        <div className="p-1">
+                          <strong className="text-indigo-900 block mb-1">{station.name}</strong>
+                          <span className="text-indigo-600 text-xs font-bold bg-indigo-50 px-2 py-0.5 rounded-full">Police Station</span>
+                        </div>
                       </Popup>
                     </Marker>
                   ))}
                 </MapContainer>
               </div>
-              <div className="mt-4 text-xs text-gray-700 text-center w-full">
-                <strong>Tip:</strong> You can zoom, pan, and click markers for details. Blue markers show police stations, others show incidents.
-              </div>
             </div>
            
             {/* Recent Activity */}
-            <div className="bg-white rounded-lg border-2 border-blue-800 shadow p-5 sm:p-6">
-              <h2 className="text-lg sm:text-xl font-bold text-[#204080] mb-4">Recent Activity</h2>
-              <div className="space-y-3">
+            <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm p-6 sm:p-8 relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-100 to-transparent"></div>
+              <h2 className="text-[11px] font-black uppercase tracking-wider text-slate-800 mb-6 flex items-center"><Activity className="w-4 h-4 mr-2 text-indigo-500" />Recent Activity</h2>
+              <div className="space-y-5">
                 {activity.map((act, idx) => (
-                  <div className="flex items-start space-x-3" key={idx}>
-                    <div className={`w-2 h-2 rounded-full mt-2 ${act.color}`}></div>
-                    <div>
-                      <p className="text-[#204080] text-sm">{act.text}</p>
-                      <p className="text-gray-500 text-xs">{act.minutes < 60 ? `${act.minutes} minutes ago` : `${act.minutes / 60} hour(s) ago`}</p>
+                  <div className="flex items-start space-x-4" key={idx}>
+                    <div className="mt-1">
+                      <div className={`w-3 h-3 rounded-full ${act.color} ring-4 ring-slate-50 shadow-sm`}></div>
+                    </div>
+                    <div className="flex-1 bg-slate-50 rounded-2xl p-3 border border-slate-100">
+                      <p className="text-slate-800 text-sm font-semibold">{act.text}</p>
+                      <p className="text-slate-400 text-[10px] font-bold uppercase mt-1 tracking-wider">{act.minutes < 60 ? `${act.minutes} minutes ago` : `${act.minutes / 60} hour(s) ago`}</p>
                     </div>
                   </div>
                 ))}
                 {usersMock.map((u, i) => (
-                  <div className="flex items-start space-x-3" key={i + 4}>
-                    <div className={`w-2 h-2 rounded-full mt-2 ${getRoleClass(u.role)}`}></div>
-                    <div>
-                      <p className="text-[#204080] text-sm">{u.name}: {u.activity}</p>
-                      <p className="text-gray-500 text-xs">{u.minAgo} minutes ago</p>
+                  <div className="flex items-start space-x-4" key={i + 4}>
+                    <div className="mt-1">
+                      <div className={`w-3 h-3 rounded-full ${getRoleClass(u.role).split(' ')[0]} ring-4 ring-slate-50 shadow-sm`}></div>
+                    </div>
+                    <div className="flex-1 bg-slate-50 rounded-2xl p-3 border border-slate-100">
+                      <p className="text-slate-800 text-sm font-semibold"><span className="text-indigo-600">{u.name}</span>: {u.activity}</p>
+                      <p className="text-slate-400 text-[10px] font-bold uppercase mt-1 tracking-wider">{u.minAgo} minutes ago</p>
                     </div>
                   </div>
                 ))}

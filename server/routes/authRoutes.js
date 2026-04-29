@@ -2,211 +2,186 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const User = require('../models/User'); // [cite: 29]
+const User = require('../models/User');
 const crypto = require('crypto');
-const nodemailer = require('nodemailer');
 
-// --- NODEMAILER TRANSPORTER SETUP ---
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: 'crimeta2025@gmail.com', 
-        pass: process.env.GMAIL_APP_PASSWORD // Aapka 16-digit App Password
-    }
-});
-
-// --- 1. CITIZEN REGISTRATION (With OTP) ---
+// --- 1. CITIZEN REGISTRATION (Simple - No OTP) ---
 router.post('/register/user', async (req, res) => {
-    try {
-        const { name, email, password, contact_number } = req.body;
-        if (!name || !email || !password || !contact_number) {
-            return res.status(400).json({ msg: 'Please enter all fields.' });
-        }
+  try {
+    const { name, email, password, contact_number } = req.body;
 
-        if (await User.findOne({ email })) {
-            return res.status(400).json({ msg: 'User with this email already exists.' });
-        }
-
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
-        const hashedOtp = await bcrypt.hash(otp, salt);
-
-        const user = new User({
-            name, email, password: hashedPassword, contact_number,
-            role: 'citizen',
-            status: 'pending_verification',
-            otp: hashedOtp,
-            otpExpiry: Date.now() + 10 * 60 * 1000 
-        });
-        
-        await user.save();
-
-        const mailOptions = {
-            from: '"Crimeta Team" <crimeta2025@gmail.com>',
-            to: email,
-            subject: 'Verify Your Account | Crimeta',
-            html: `
-                <div style="font-family: Arial; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-                    <h2 style="color: #007bff;">Hello ${name},</h2>
-                    <p>Welcome to <b>Crimeta</b>. Use the following OTP to verify your account:</p>
-                    <h1 style="background: #f4f4f4; padding: 10px; text-align: center; letter-spacing: 5px;">${otp}</h1>
-                    <p>This code is valid for 10 minutes. Please do not share it with anyone.</p>
-                </div>`
-        };
-
-        console.log(`Sending OTP ${otp} to ${email}`); // Testing 
-        console.log(`Sending OTP ${otp} to ${email}`); // Testing ke liye logs mein dikhega
-        await transporter.sendMail(mailOptions);
-
-        res.status(201).json({ msg: 'Registration successful! Check your email for OTP.', email: email });
-
-    } catch (error) {
-        console.error("Registration Error:", error);
-        res.status(500).json({ error: "Failed to send email.", details: error.message });
+    if (!name || !email || !password || !contact_number) {
+      return res.status(400).json({ msg: 'Please enter all fields.' });
     }
+
+    if (await User.findOne({ email })) {
+      return res.status(400).json({ msg: 'User with this email already exists.' });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const user = new User({
+      name,
+      email,
+      password: hashedPassword,
+      contact_number,
+      role: 'citizen',
+      status: 'approved' // OTP nahi hai, toh seedha approve kar rahe hain
+    });
+
+    await user.save();
+    console.log("✅ User registered and approved:", email);
+
+    res.status(201).json({
+      msg: 'Registration successful! You can now login.',
+      email: email
+    });
+
+  } catch (error) {
+    console.error("Registration Error:", error);
+    res.status(500).json({ error: "Server Error", details: error.message });
+  }
 });
 
-// --- 2. DEPARTMENT REGISTRATION ---
+// --- 2. DEPARTMENT REGISTRATION (Simple - No OTP) ---
 router.post('/register/department', async (req, res) => {
-    try {
-        const { name, email, password, contact_number, address, city, pincode, badge_number, latitude, longitude } = req.body;
+  try {
+    // 1. req.body se sara data extract karo
+    const { 
+      name, email, password, contact_number, 
+      address, city, pincode, role, 
+      department, ward_assigned, designation, location 
+    } = req.body;
 
-        if (!latitude || !longitude) {
-            return res.status(400).json({ msg: 'Location coordinates are required.' });
-        }
-        if (await User.findOne({ email })) {
-            return res.status(400).json({ msg: 'Department already exists.' });
-        }
-
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
-        const hashedOtp = await bcrypt.hash(otp, salt);
-
-        const user = new User({
-            name, email, password: hashedPassword, contact_number,
-            role: 'police', status: 'pending_verification',
-            address, city, pincode, badge_number,
-            location: { type: 'Point', coordinates: [parseFloat(longitude), parseFloat(latitude)] },
-            otp: hashedOtp,
-            otpExpiry: Date.now() + 10 * 60 * 1000
-        });
-        await user.save();
-
-        const mailOptions = {
-            from: '"Crimeta Police Portal" <crimeta2025@gmail.com>',
-            to: email,
-            subject: 'Police Department Verification | Crimeta',
-            html: `<p>Hello Officer <b>${name}</b>,</p><p>Your verification OTP is: <b style="font-size: 20px;">${otp}</b></p>`
-        };
-
-        await transporter.sendMail(mailOptions);
-        res.status(201).json({ msg: 'Registration request sent! Check email.', email: user.email });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
+    // 2. Official ke liye Location validation
+    // Citizen ke liye location optional ho sakti hai, par Official/NMC ke liye required hai
+    if (role === 'official') {
+      if (!location || !location.coordinates || location.coordinates.length !== 2) {
+        return res.status(400).json({ msg: 'Official location coordinates (longitude & latitude) are required.' });
+      }
     }
+
+    // 3. Email Check (Pehle se registered toh nahi hai?)
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ msg: 'User or Department already exists with this email.' });
+    }
+
+    // 4. Password Hashing
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // 5. AUTO-APPROVAL LOGIC
+    // Agar role 'citizen' hai toh direct 'approved', agar 'official' hai toh 'pending_approval'
+    let finalStatus = 'approved';
+    if (role === 'official') {
+      finalStatus = 'pending_approval';
+    }
+
+    // 6. New User Instance creation
+    const userFields = {
+      name,
+      email,
+      password: hashedPassword,
+      contact_number,
+      role: role || 'citizen', // Default citizen agar kuch na bheja ho
+      status: finalStatus,
+      address,
+      city: city || 'Nagpur',
+      pincode,
+      department,
+      ward_assigned,
+      designation
+    };
+
+    // Location sirf tabhi add karo jab data ho (Official ke liye)
+    if (location && location.coordinates) {
+      userFields.location = {
+        type: 'Point',
+        coordinates: [
+          parseFloat(location.coordinates[0]), 
+          parseFloat(location.coordinates[1])
+        ]
+      };
+    }
+
+    const user = new User(userFields);
+    await user.save();
+
+    console.log(`✅ ${role} registered: ${email} | Status: ${finalStatus}`);
+
+    // 7. Custom Response Message
+    const successMsg = (role === 'official') 
+      ? 'Department registration successful! Awaiting admin approval.' 
+      : 'User registered successfully!';
+
+    res.status(201).json({ 
+      msg: successMsg, 
+      email: user.email,
+      status: user.status 
+    });
+
+  } catch (error) {
+    console.error("❌ Registration Error:", error.message);
+    res.status(500).json({ error: error.message });
+  }
 });
 
 
-router.post('/verify-otp', async (req, res) => {
-    try {
-        const { email, receivedOtp } = req.body;
-        const user = await User.findOne({ email });
-
-        if (!user) return res.status(404).json({ msg: 'User not found.' });
-        if (!user.otp || user.otpExpiry < Date.now()) return res.status(400).json({ msg: 'OTP expired.' });
-
-        const isMatch = await bcrypt.compare(receivedOtp, user.otp);
-        if (!isMatch) return res.status(400).json({ msg: 'Invalid OTP.' });
-
-        user.status = user.role === 'citizen' ? 'approved' : 'pending_approval';
-        user.otp = undefined;
-        user.otpExpiry = undefined;
-        await user.save();
-
-        res.status(200).json({ msg: 'Email verified!', status: user.status });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-
+// --- 3. LOGIN ROUTE ---
 router.post('/login', async (req, res) => {
-    try {
-        const { email, password } = req.body;
-        const user = await User.findOne({ email });
+  try {
+    const { email, password } = req.body;
 
-        if (!user || !await bcrypt.compare(password, user.password)) {
-            return res.status(400).json({ msg: 'Invalid Credentials' });
-        }
+    // 1. Lean Query: .lean() use karne se Mongoose objects fast load hote hain (Read-only speed)
+    const user = await User.findOne({ email }).lean();
 
-        if (user.status !== 'approved' && user.status !== 'pending_approval') {
-            return res.status(403).json({ msg: `Account status: ${user.status}` });
-        }
-
-        const payload = { user: { id: user.id, role: user.role, name: user.name } };
-        const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '5h' }); // 
-        res.status(200).json({ message: "Login Successful", token });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
+    if (!user) {
+      return res.status(400).json({ msg: 'Invalid Credentials' });
     }
-});
 
-// --- 5. FORGOT PASSWORD ---
-router.post('/forgot-password', async (req, res) => {
-    try {
-        const { email } = req.body;
-        const user = await User.findOne({ email });
-
-        if (!user) return res.status(200).json({ msg: 'If registered, you will receive a link.' });
-
-        const resetToken = crypto.randomBytes(32).toString('hex');
-        const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
-
-        user.passwordResetToken = hashedToken;
-        user.passwordResetExpires = Date.now() + 15 * 60 * 1000;
-        await user.save();
-
-        const resetUrl = `https://crimeta.onrender.com/reset-password/${resetToken}`;
-
-        const mailOptions = {
-            from: '"Crimeta Team" <crimeta2025@gmail.com>',
-            to: email,
-            subject: 'Password Reset Request | Crimeta',
-            html: `<h3>Reset Your Password</h3><p>Click <a href="${resetUrl}">here</a> to reset your password. Valid for 15 mins.</p>`
-        };
-
-        await transporter.sendMail(mailOptions);
-        res.status(200).json({ msg: 'Reset link sent to email.' });
-    } catch (error) {
-        res.status(500).json({ error: 'Something went wrong' });
+    // 2. Status Check: Agar official pending hai toh use login mat karne do
+    if (user.role === 'official' && user.status === 'pending_approval') {
+      return res.status(403).json({ msg: 'Account awaiting admin approval. Please wait.' });
     }
-});
 
-// --- 6. RESET PASSWORD ---
-router.post('/reset-password/:token', async (req, res) => {
-    try {
-        const { password } = req.body;
-        const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
-
-        const user = await User.findOne({
-            passwordResetToken: hashedToken,
-            passwordResetExpires: { $gt: Date.now() }
-        });
-
-        if (!user) return res.status(400).json({ msg: 'Token invalid or expired.' });
-
-        const salt = await bcrypt.genSalt(10);
-        user.password = await bcrypt.hash(password, salt);
-        user.passwordResetToken = undefined;
-        user.passwordResetExpires = undefined;
-        await user.save();
-
-        res.status(200).json({ msg: 'Password reset successful!' });
-    } catch (error) {
-        res.status(500).json({ error: 'Something went wrong' });
+    // 3. Password Verification: Ye CPU intensive hota hai, ensures everything else is ready first
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ msg: 'Invalid Credentials' });
     }
+
+    // 4. Token Payload: Role aur Department dono bhejo taaki frontend pe decide ho sake kya dikhana hai
+    const payload = { 
+      user: { 
+        id: user._id, 
+        role: user.role, 
+        name: user.name,
+        department: user.department || null 
+      } 
+    };
+
+    // 5. JWT Sign: Secret key check kar lena .env mein hai na
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '10h' });
+
+    console.log(`🚀 Login Success: ${user.email} (${user.role})`);
+
+    res.status(200).json({ 
+      message: "Login Successful", 
+      token,
+      user: {
+        name: user.name,
+        role: user.role,
+        department: user.department,
+        status: user.status
+      }
+    });
+
+  } catch (error) {
+    console.error("❌ Login Error:", error.message);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 });
 
 module.exports = router;

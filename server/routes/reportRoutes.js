@@ -1,89 +1,78 @@
-
-
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const cloudinary = require('cloudinary').v2;
-const CrimeReport = require('../models/CrimeReports');
+const Report = require('../models/CrimeReports'); // Update model name if changed
 const { isAuthenticated } = require('../middleware/auth');
 
 // --- Cloudinary Configuration ---
-if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET) {
-    cloudinary.config({
-        cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-        api_key: process.env.CLOUDINARY_API_KEY,
-        api_secret: process.env.CLOUDINARY_API_SECRET
-    });
-    console.log("Cloudinary configured successfully!");
-} else {
-    console.error("!!! CLOUDINARY ENVIRONMENT VARIABLES NOT FOUND !!!");
-    console.error("Please check your .env file.");
-}
-
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
 const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
-        folder: 'crime-reports',
-        allowed_formats: ['jpeg', 'png', 'jpg', 'mp4', 'mov', 'avi'],
+        folder: 'city-resolve-reports',
+        allowed_formats: ['jpeg', 'png', 'jpg', 'mp4'],
         resource_type: 'auto'
     },
 });
 
 const upload = multer({ storage: storage });
 
-const getSeverity = (incidentType) => {
-    // ... aapka severity wala function ...
-    switch (incidentType) {
-        case 'Assault':
-        case 'Domestic Violence':
-        case 'Fraud':
-            return 'High';
-        case 'Theft/Burglary':
-        case 'Drug Activity':
-        case 'Harassment':
-        case 'Suspicious Activity':
-            return 'Medium';
-        default:
-            return 'Low';
-    }
+// --- Helper: Auto-assign Department & Priority ---
+const getReportingDetails = (type) => {
+    const mapping = {
+        // Safety / Police
+        'Women Safety SOS': { dept: 'Women_Safety_Unit', priority: 'Critical', cat: 'Safety' },
+        'Harassment': { dept: 'Police', priority: 'High', cat: 'Safety' },
+        'Theft/Burglary': { dept: 'Police', priority: 'High', cat: 'Safety' },
+        
+        // NMC Engineering
+        'Potholes': { dept: 'NMC_Engineering', priority: 'Medium', cat: 'Infrastructure' },
+        'Broken Footpath': { dept: 'NMC_Engineering', priority: 'Low', cat: 'Infrastructure' },
+        
+        // NMC Sanitation
+        'Garbage Overflow': { dept: 'NMC_Sanitation', priority: 'Medium', cat: 'Sanitation' },
+        'Clogged Drain': { dept: 'NMC_Sanitation', priority: 'High', cat: 'Sanitation' },
+        
+        // NMC Electrical/Water
+        'Streetlight Not Working': { dept: 'NMC_Electrical', priority: 'Medium', cat: 'Utility' },
+        'Water Leakage': { dept: 'NMC_Water', priority: 'High', cat: 'Utility' }
+    };
+
+    return mapping[type] || { dept: 'Police', priority: 'Low', cat: 'Other' };
 };
 
-// ROUTE: POST /user/create
+// @route   POST /api/reports/create
 router.post('/create', isAuthenticated, upload.array('evidenceFiles', 5), async (req, res) => {
-    console.log("--- '/user/create' route hit ---");
-    console.log("Received Body:", req.body);
-    console.log("Received Files:", req.files);
-
     try {
-        const { 
-            incidentType, 
-            locationAddress, 
-            latitude, 
-            longitude, 
-            incidentDate, 
-            description, 
-            isAnonymous 
-        } = req.body;
+        const { incidentType, locationAddress, latitude, longitude, incidentDate, description, isAnonymous, severity } = req.body;
 
-        // Validation: Check karein ki zaroori fields hain ya nahi
-        if (!incidentType || !locationAddress || !incidentDate || !description) {
-            return res.status(400).json({ msg: "Please fill all required fields." });
+        if (!incidentType || !locationAddress || !description) {
+            return res.status(400).json({ msg: "Essential fields are missing." });
         }
 
+        // Logic: Auto-get Dept and Priority
+        const { dept, priority, cat } = getReportingDetails(incidentType);
         const evidenceUrls = req.files ? req.files.map(file => file.path) : [];
-        const severity = getSeverity(incidentType);
 
-        const newReport = new CrimeReport({
+        const newReport = new Report({
+            category: cat,
             incidentType,
-            severity,
+            department: dept,
+            priority: priority,
+            severity: severity || 'Medium', // User's perceived severity
             locationAddress,
             location: {
                 type: 'Point',
                 coordinates: [parseFloat(longitude), parseFloat(latitude)]
             },
-            incidentDate,
+            incidentDate: incidentDate || Date.now(),
             description,
             evidenceUrls,
             isAnonymous: isAnonymous === 'true',
@@ -91,68 +80,56 @@ router.post('/create', isAuthenticated, upload.array('evidenceFiles', 5), async 
         });
 
         await newReport.save();
-
-        res.status(201).json({ msg: 'Report created successfully', report: newReport });
+        res.status(201).json({ msg: 'Issue reported successfully', report: newReport });
 
     } catch (error) {
-        // --- YEH HAI SABSE ZAROORI HISSA ---
-        // Yeh backend ke asli error ko pakdega aur frontend ko bhejega
-        console.error("!!! ERROR WHILE CREATING REPORT !!!");
-        console.error(error); // Terminal me poora error print karega
+        console.error("Report Creation Error:", error);
         res.status(500).json({ msg: `Server Error: ${error.message}` });
     }
 });
 
-router.get('/my-reports', isAuthenticated, async (req, res) => {
-    try {
-        // User ki ID (jo token se aayi hai) ke aadhar par reports dhundho
-        const reports = await CrimeReport.find({ reportedBy: req.user.id }).sort({ createdAt: -1 });
-        res.json(reports);
-    } catch (error) {
-        console.error(error.message);
-        res.status(500).send('Server Error');
-    }
-});
-
-router.get('/all-reports', isAuthenticated, async (req, res) => {
-    try {
-        // Database se saari reports nikalo
-        const reports = await CrimeReport.find({})
-            .populate('reportedBy', 'name') // Agar reporter ka naam chahiye
-            .sort({ createdAt: -1 });
-        
-        res.status(200).json(reports);
-    } catch (error) {
-        console.error("Error fetching all reports:", error.message);
-        res.status(500).send('Server Error');
-    }
-});
-
-
+// @route   GET /api/reports/overview (Dashboard Stats)
 router.get('/overview', isAuthenticated, async (req, res) => {
     try {
-        const totalReports = await CrimeReport.countDocuments();
-        const resolvedCases = await CrimeReport.countDocuments({ status: 'resolved' });
-        const activeCases = await CrimeReport.countDocuments({ status: { $in: ['new', 'in_progress'] } });
-
-        // Reports by Type ka data calculate karein
-        const reportsByType = await CrimeReport.aggregate([
-            { $group: { _id: '$incidentType', count: { $sum: 1 } } },
-            { $sort: { count: -1 } }
+        const stats = await Report.aggregate([
+            {
+                $facet: {
+                    "counts": [
+                        { $group: { 
+                            _id: null, 
+                            total: { $sum: 1 },
+                            resolved: { $sum: { $cond: [{ $eq: ["$status", "resolved"] }, 1, 0] } },
+                            active: { $sum: { $cond: [{ $in: ["$status", ["new", "in_progress"]] }, 1, 0] } }
+                        }}
+                    ],
+                    "byDepartment": [
+                        { $group: { _id: "$department", count: { $sum: 1 } } }
+                    ],
+                    "byPriority": [
+                        { $group: { _id: "$priority", count: { $sum: 1 } } }
+                    ]
+                }
+            }
         ]);
 
         res.json({
-            totalReports,
-            resolvedCases,
-            activeCases,
-            reportsByType
+            summary: stats[0].counts[0] || { total: 0, resolved: 0, active: 0 },
+            departmentWise: stats[0].byDepartment,
+            priorityWise: stats[0].byPriority
         });
     } catch (error) {
-        console.error("Error fetching stats:", error.message);
+        res.status(500).send('Stats Error');
+    }
+});
+
+// @route   GET /api/reports/my-reports
+router.get('/my-reports', isAuthenticated, async (req, res) => {
+    try {
+        const reports = await Report.find({ reportedBy: req.user.id }).sort({ createdAt: -1 });
+        res.json(reports);
+    } catch (error) {
         res.status(500).send('Server Error');
     }
 });
 
 module.exports = router;
-
-

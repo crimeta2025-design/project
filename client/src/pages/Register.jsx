@@ -45,75 +45,161 @@ const Register = () => {
     }));
   };
 
+  // const handleRegisterSubmit = async (e) => {
+  //   e.preventDefault();
+  //   setLoading(true);
+  //   setError('');
+
+  //   if (formData.password !== formData.confirmPassword) {
+  //     setError('Passwords do not match');
+  //     setLoading(false);
+  //     return;
+  //   }
+  //   if (formData.password.length < 8) {
+  //     setError('Password must be at least 8 characters');
+  //     setLoading(false);
+  //     return;
+  //   }
+
+  //   try {
+  //     let API_URL = '';
+  //     let payload = {};
+
+  //     if (formData.role === 'police') {
+  //       // Police ke liye pehle location get karein
+  //       const position = await new Promise((resolve, reject) => {
+  //           navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true });
+  //       });
+        
+  //       API_URL = 'https://crimeta1.onrender.com/auth/register/department';
+  //       payload = {
+  //           name: formData.name,
+  //           email: formData.email,
+  //           password: formData.password,
+  //           contact_number: formData.phone,
+  //           badge_number: formData.badgeNumber,
+  //           address: formData.address,
+  //           city: formData.city,
+  //           pincode: formData.pincode,
+  //           latitude: position.coords.latitude,
+  //           longitude: position.coords.longitude,
+  //       };
+  //     } else { // citizen
+  //       API_URL = 'https://crimeta1.onrender.com/auth/register/user';
+  //       payload = {
+  //           name: formData.name,
+  //           email: formData.email,
+  //           password: formData.password,
+  //           contact_number: formData.phone,
+  //       };
+  //     }
+
+  //     const response = await fetch(API_URL, {
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: JSON.stringify(payload),
+  //     });
+
+  //     const responseData = await response.json();
+  //     if (!response.ok) {
+  //       throw new Error(responseData.msg || 'Something went wrong');
+  //     }
+
+  //     console.log('Registration details submitted. OTP sent.');
+  //     setUiStep('otp');
+
+  //   } catch (err) {
+  //     setError(err.message || 'Could not get location. Please enable location services.');
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    setLoading(true); // Loading start
     setError('');
 
+    // --- Validation Logic ---
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
-      setLoading(false);
-      return;
+        setError('Passwords do not match');
+        setLoading(false);
+        return;
     }
     if (formData.password.length < 8) {
-      setError('Password must be at least 8 characters');
-      setLoading(false);
-      return;
+        setError('Password must be at least 8 characters');
+        setLoading(false);
+        return;
     }
 
     try {
-      let API_URL = '';
-      let payload = {};
+        let API_URL = '';
+        let payload = {};
 
-      if (formData.role === 'police') {
-        // Police ke liye pehle location get karein
-        const position = await new Promise((resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true });
+        // --- Role-based Payload Building ---
+        if (formData.role === 'police') {
+            // Police ke liye geospatial location get karein [cite: 15, 17]
+            const position = await new Promise((resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(resolve, reject, { 
+                    enableHighAccuracy: true,
+                    timeout: 5000 
+                });
+            });
+            
+            API_URL = 'https://crimeta1.onrender.com/auth/register/department';
+            payload = {
+                name: formData.name,
+                email: formData.email,
+                password: formData.password,
+                contact_number: formData.phone,
+                badge_number: formData.badgeNumber,
+                address: formData.address,
+                city: formData.city,
+                pincode: formData.pincode,
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude,
+            };
+        } else { 
+            // Normal citizen ke liye simple register [cite: 18]
+            API_URL = 'https://crimeta1.onrender.com/auth/register/user';
+            payload = {
+                name: formData.name,
+                email: formData.email,
+                password: formData.password,
+                contact_number: formData.phone,
+            };
+        }
+
+        // --- API Call ---
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
         });
+
+        const responseData = await response.json();
+
+        if (!response.ok) {
+            // Agar email pehle se exist karta hai toh error dikhayega
+            throw new Error(responseData.msg || 'Registration failed');
+        }
+
+        // --- Final Success Step ---
+        console.log('User registered successfully in DB.');
+        alert(responseData.msg || 'Registration Successful! Please Login.');
         
-        API_URL = 'https://crimeta1.onrender.com/auth/register/department';
-        payload = {
-            name: formData.name,
-            email: formData.email,
-            password: formData.password,
-            contact_number: formData.phone,
-            badge_number: formData.badgeNumber,
-            address: formData.address,
-            city: formData.city,
-            pincode: formData.pincode,
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-        };
-      } else { // citizen
-        API_URL = 'https://crimeta1.onrender.com/auth/register/user';
-        payload = {
-            name: formData.name,
-            email: formData.email,
-            password: formData.password,
-            contact_number: formData.phone,
-        };
-      }
-
-      const response = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      const responseData = await response.json();
-      if (!response.ok) {
-        throw new Error(responseData.msg || 'Something went wrong');
-      }
-
-      console.log('Registration details submitted. OTP sent.');
-      setUiStep('otp');
+        // OTP screen par jane ke bajaye seedha Login par bhej dein
+        navigate('/login');
 
     } catch (err) {
-      setError(err.message || 'Could not get location. Please enable location services.');
+        console.error("Frontend Error:", err);
+        setError(err.message || 'Check your internet connection or location services.');
     } finally {
-      setLoading(false);
+        // Zaroori: Har haal mein loading false karein taaki button normal ho jaye
+        setLoading(false);
     }
-  };
+};
 
   const handleVerifySubmit = async (e) => {
     e.preventDefault();

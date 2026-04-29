@@ -22,11 +22,11 @@ mongoose
 // 4. API Routes (Static serve se pehle aayenge)
 const authRoute = require("./routes/authRoutes.js");
 const reportRoute = require("./routes/reportRoutes.js");
-const policeRoute = require("./routes/policeRoutes.js");
+const officialRoute = require("./routes/officialRoutes.js");
 
 app.use("/auth", authRoute);
 app.use("/user", reportRoute);
-app.use("/api/police", policeRoute);
+app.use("/api/official", officialRoute);
 
 // 6. Server ko Start Karna
 const PORT = process.env.PORT || 8080;
